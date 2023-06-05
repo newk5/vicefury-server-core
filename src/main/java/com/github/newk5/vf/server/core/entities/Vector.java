@@ -71,5 +71,4 @@ public class Vector {
     public String toString() {
         return "Vector{" + "x=" + x + ", y=" + y + ", z=" + z + '}';
     }
-
 }

@@ -73,7 +73,4 @@ public class Rotation {
         }
         return Double.doubleToLongBits(this.roll) == Double.doubleToLongBits(other.roll);
     }
-    
-    
-
 }

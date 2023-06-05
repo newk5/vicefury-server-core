@@ -3,7 +3,6 @@ package com.github.newk5.vf.server.core.controllers.commands;
 import com.github.newk5.vf.server.core.Server;
 import com.github.newk5.vf.server.core.entities.player.Player;
 
-
 public abstract class ServerCommandController {
 
     protected Server server;

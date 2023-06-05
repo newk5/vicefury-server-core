@@ -56,7 +56,6 @@ public class Player extends GameEntity {
             return this.nativeGetPosition(this.id);
         }
         return null;
-
     }
 
     private native Vector nativeGetForwardVector(int id);
@@ -66,7 +65,6 @@ public class Player extends GameEntity {
             return this.nativeGetForwardVector(this.id);
         }
         return null;
-
     }
 
     private native Vector nativeGetRightVector(int id);
@@ -76,7 +74,6 @@ public class Player extends GameEntity {
             return this.nativeGetRightVector(this.id);
         }
         return null;
-
     }
 
     private native void nativeSetPosition(int PlayerID, double X, double Y, double Z);
@@ -378,5 +375,4 @@ public class Player extends GameEntity {
         final Player other = (Player) obj;
         return this.id == other.id;
     }
-
 }

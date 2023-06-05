@@ -6,13 +6,13 @@ import com.github.newk5.vf.server.core.controllers.commands.ServerCommandControl
 import com.github.newk5.vf.server.core.exceptions.CommandParamCountException;
 import com.github.newk5.vf.server.core.exceptions.CommandTypeResolverNotFound;
 import com.github.newk5.vf.server.core.exceptions.InvalidParameterTypeException;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 
 public class ServerCommand {
 

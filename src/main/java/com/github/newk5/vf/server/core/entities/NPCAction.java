@@ -21,5 +21,4 @@ public enum NPCAction {
         }
         return null;
     }
-
 }

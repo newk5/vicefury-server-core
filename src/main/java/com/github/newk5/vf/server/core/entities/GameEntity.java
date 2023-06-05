@@ -4,10 +4,11 @@ import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
 import com.github.newk5.vf.server.core.exceptions.InvalidThreadException;
+import com.github.newk5.vf.server.core.utils.Log;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import org.tinylog.Logger;
 
 public abstract class GameEntity {
 
@@ -27,13 +28,11 @@ public abstract class GameEntity {
 
     protected boolean threadIsValid() {
         if (this.threadId != Thread.currentThread().getId()) {
-            InvalidThreadException ex = new InvalidThreadException("You cannot use the server API from outside the main server thread");
-            Logger.error(ex);
-            ex.printStackTrace();
+            InvalidThreadException e = new InvalidThreadException("You cannot use the server API from outside the main server thread");
+            Log.exception(e);
             return false;
-        } else {
-            return true;
         }
+        else return true;
     }
     
     public Player asPlayer(){
@@ -139,9 +138,4 @@ public abstract class GameEntity {
         }
         return this.type == other.type;
     }
-    
-    
-    
-    
-
 }

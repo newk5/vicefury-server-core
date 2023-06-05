@@ -2,7 +2,6 @@ package com.github.newk5.vf.server.core.commands.resolvers;
 
 import com.github.newk5.vf.server.core.exceptions.InvalidParameterTypeException;
 
-
 public class FloatResolver extends BaseTypeResolver {
 
     public FloatResolver() {
@@ -16,13 +15,9 @@ public class FloatResolver extends BaseTypeResolver {
             throw new InvalidParameterTypeException("Failed to resolve Float input '" + input + "' to Float");
         }
         try {
-            Float v = Float.valueOf(input);
-            return v;
+            return Float.valueOf(input);
         } catch (Exception e) {
             throw new InvalidParameterTypeException("Failed to resolve Float input '" + input + "' to Float");
         }
-
-        
     }
-
 }

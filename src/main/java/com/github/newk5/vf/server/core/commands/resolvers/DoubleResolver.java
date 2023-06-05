@@ -2,7 +2,6 @@ package com.github.newk5.vf.server.core.commands.resolvers;
 
 import com.github.newk5.vf.server.core.exceptions.InvalidParameterTypeException;
 
-
 public class DoubleResolver extends BaseTypeResolver {
 
     public DoubleResolver() {
@@ -16,13 +15,9 @@ public class DoubleResolver extends BaseTypeResolver {
             throw new InvalidParameterTypeException("Failed to resolve Double input '" + input + "' to Double");
         }
         try {
-            Double v = Double.valueOf(input);
-            return v;
+            return Double.valueOf(input);
         } catch (Exception e) {
             throw new InvalidParameterTypeException("Failed to resolve Double input '" + input + "' to Double");
         }
-
-        
     }
-
 }

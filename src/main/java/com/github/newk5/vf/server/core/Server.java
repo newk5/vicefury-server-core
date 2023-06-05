@@ -1,24 +1,22 @@
 package com.github.newk5.vf.server.core;
 
 import com.github.newk5.vf.server.core.commands.CommandRegistry;
-import com.github.newk5.vf.server.core.entities.GameEntity;
-import com.github.newk5.vf.server.core.entities.GameEntityType;
+import com.github.newk5.vf.server.core.entities.*;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
+import com.github.newk5.vf.server.core.entities.npc.NPCSpawnProps;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
-import com.github.newk5.vf.server.core.entities.npc.NPCSpawnProps;
-import static com.github.newk5.vf.server.core.InternalServerEvents.server;
-import com.github.newk5.vf.server.core.entities.Rotation;
-import com.github.newk5.vf.server.core.entities.Vector;
-import com.github.newk5.vf.server.core.entities.VectorWithAngle;
 import com.github.newk5.vf.server.core.exceptions.InvalidThreadException;
+import com.github.newk5.vf.server.core.utils.Log;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import org.tinylog.Logger;
+
+import static com.github.newk5.vf.server.core.InternalServerEvents.server;
 
 public class Server {
 
@@ -36,13 +34,11 @@ public class Server {
 
     private boolean threadIsValid() {
         if (this.threadId != Thread.currentThread().getId()) {
-            InvalidThreadException ex = new InvalidThreadException("You cannot use the server API from outside the main server thread, use server.mainThread(()-> {  }) to run this on the main thread");
-            Logger.error((Throwable) ex);
-            ex.printStackTrace();
+            InvalidThreadException e = new InvalidThreadException("You cannot use the server API from outside the main server thread, use server.mainThread(()-> {  }) to run this on the main thread");
+            Log.exception(e);
             return false;
-        } else {
-            return true;
         }
+        else return true;
     }
 
     public List<Player> getAllPlayers() {
@@ -92,7 +88,6 @@ public class Server {
         if (this.threadIsValid()) {
             this.nativeWarningLog(msg);
         }
-
         return this;
     }
 
@@ -105,9 +100,7 @@ public class Server {
             mainThread(() -> {
                 this.nativeSendChatMessageToAll(color, message);
             });
-
         }
-
         return this;
     }
 
@@ -121,7 +114,6 @@ public class Server {
                 this.nativeSendChatMessageToAll(color, message);
             });
         }
-
         return this;
     }
 
@@ -137,7 +129,6 @@ public class Server {
                 this.nativeSendChatMessageToPlayer(id, color, message);
             });
         }
-
         return this;
     }
 
@@ -151,7 +142,6 @@ public class Server {
                 this.nativeSendChatMessageToPlayer(p.getId(), color, message);
             });
         }
-
         return this;
     }
 
@@ -162,18 +152,12 @@ public class Server {
     }
 
     public GameEntity getGameEntity(GameEntityType type, int id) {
-        if (type.value == 1) {
-            Player p = server.getPlayer(id);
-            return p;
-        } else if (type.value == 2) {
-
-            Vehicle p = server.getVehicle(id);
-            return p;
-        } else if (type.value == 3) {
-            NPC p = server.getNPC(id);
-            return p;
+        switch (type.value) {
+            case 1: return server.getPlayer(id);
+            case 2: return server.getVehicle(id);
+            case 3: return server.getNPC(id);
+            default: return null;
         }
-        return null;
     }
 
     private native void nativeSetSpawnScreenLocation(double X, double Y, double Z, double yawLookAt);
@@ -212,7 +196,6 @@ public class Server {
                 NPC npc = getNPC(id);
                 if (SpawnProperties.getControllerClass() != null) {
                     npc.setController(SpawnProperties.getControllerClass());
-
                 }
                 return npc;
             }
@@ -223,18 +206,15 @@ public class Server {
     private native void nativeSendData(int playerID, String channel, String data);
 
     public Server sendData(int playerID, String channel, String data) {
-
         if (data != null) {
             if (!isOnMainThread()) {
                 mainThread(() -> {
                     nativeSendData(playerID, channel, data);
                 });
-            } else {
-                nativeSendData(playerID, channel, data);
             }
-        } else {
-            Logger.error("server.sendData called with null data");
+            else nativeSendData(playerID, channel, data);
         }
+        else Log.exception("Unable to send client data to player: %d, channel: %s (Invalid data)", playerID, channel);
 
         return this;
     }
@@ -242,17 +222,15 @@ public class Server {
     public GameTimer createTimer(String name, long interval, boolean recurring, Consumer<GameTimer> r) {
         if (threadIsValid()) {
             if (InternalServerEvents.timers.stream().anyMatch(t -> t.getName().equalsIgnoreCase(name))) {
-                String message = "ERROR - A timer with the name " + name + " already exists";
-                Logger.error(message);
+                Log.exception("Unable to create timer with name: %s (Timer already exists)", name);
                 return null;
             }
             GameTimer timer = new GameTimer(name, recurring, interval, r);
             timerCounter++;
             InternalServerEvents.timers.add(timer);
             return timer;
-        } else {
-            return null;
         }
+        else return null;
     }
 
     public List<GameTimer> getAllTimers() {
@@ -270,9 +248,8 @@ public class Server {
             timerCounter++;
             InternalServerEvents.timers.add(timer);
             return timer;
-        } else {
-            return null;
         }
+        else return null;
     }
 
     public GameTimer repeatUntil(long interval, Consumer<GameTimer> r, Predicate<GameTimer> stopCondition) {
@@ -281,9 +258,8 @@ public class Server {
             timerCounter++;
             InternalServerEvents.timers.add(timer);
             return timer;
-        } else {
-            return null;
         }
+        else return null;
     }
 
     public GameTimer delay(long delay, Consumer<GameTimer> r) {
@@ -292,9 +268,8 @@ public class Server {
             timerCounter++;
             InternalServerEvents.timers.add(timer);
             return timer;
-        } else {
-            return null;
         }
+        else return null;
     }
 
     public GameTimer every(long interval, Consumer<GameTimer> r) {
@@ -303,9 +278,8 @@ public class Server {
             timerCounter++;
             InternalServerEvents.timers.add(timer);
             return timer;
-        } else {
-            return null;
         }
+        else return null;
     }
 
     public Server sendData(Player p, String channel, String data) {
@@ -330,5 +304,4 @@ public class Server {
         }
         return null;
     }
-
 }

@@ -2,7 +2,6 @@ package com.github.newk5.vf.server.core.commands.resolvers;
 
 import com.github.newk5.vf.server.core.exceptions.InvalidParameterTypeException;
 
-
 public class LongResolver extends BaseTypeResolver {
 
     public LongResolver() {
@@ -16,13 +15,9 @@ public class LongResolver extends BaseTypeResolver {
             throw new InvalidParameterTypeException("Failed to resolve Long input '" + input + "' to Long");
         }
         try {
-            Long v = Long.valueOf(input);
-            return v;
+            return Long.valueOf(input);
         } catch (Exception e) {
             throw new InvalidParameterTypeException("Failed to resolve Long input '" + input + "' to Long");
         }
-
-        
     }
-
 }

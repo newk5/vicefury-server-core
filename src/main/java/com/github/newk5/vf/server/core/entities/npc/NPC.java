@@ -2,13 +2,10 @@ package com.github.newk5.vf.server.core.entities.npc;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
 import com.github.newk5.vf.server.core.controllers.ai.NPCController;
-import com.github.newk5.vf.server.core.entities.GameEntity;
-import com.github.newk5.vf.server.core.entities.GameEntityType;
-import com.github.newk5.vf.server.core.entities.NPCAction;
-import com.github.newk5.vf.server.core.entities.Vector;
-import com.github.newk5.vf.server.core.entities.VectorWithAngle;
+import com.github.newk5.vf.server.core.entities.*;
+import com.github.newk5.vf.server.core.utils.Log;
+
 import java.util.HashSet;
-import org.tinylog.Logger;
 
 public class NPC extends GameEntity {
 
@@ -21,7 +18,6 @@ public class NPC extends GameEntity {
         super();
         this.id = id;
         type = GameEntityType.NPC;
-
     }
 
     public NPC setController(Class controllerClass) {
@@ -30,11 +26,8 @@ public class NPC extends GameEntity {
             try {
                 Object v = controllerClass.getConstructors()[0].newInstance(this);
                 this.controller = (NPCController) v;
-            } catch (Exception e) {
-                e.printStackTrace();
-                Logger.error(e);
             }
-
+            catch (Exception e) { Log.exception(e); }
         }
         return this;
     }
@@ -125,7 +118,6 @@ public class NPC extends GameEntity {
     public NPC setTarget(GameEntity e) {
 
         if (isOnMainThread()) {
-
             nativeSetTarget(id, e == null ? -1 : e.type.value, e == null ? -1 : e.getId());
         } else {
             InternalServerEvents.server.mainThread(() -> {
@@ -221,7 +213,6 @@ public class NPC extends GameEntity {
                 nativeDisableAutoRespawn(id);
             });
         }
-
         return this;
     }
 
@@ -361,7 +352,6 @@ public class NPC extends GameEntity {
         if (threadIsValid()) {
             return nativeIsWithinLineOfSight(id, ent.type.value, ent.getId());
         }
-
         return false;
     }
 
@@ -472,5 +462,4 @@ public class NPC extends GameEntity {
     public String toString() {
         return "NPC{" + "id=" + id + '}';
     }
-
 }

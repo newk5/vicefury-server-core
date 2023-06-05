@@ -1,9 +1,9 @@
 package com.github.newk5.vf.server.core;
 
+import com.github.newk5.vf.server.core.utils.Log;
+
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import org.tinylog.Logger;
-
 
 public class GameTimer {
 
@@ -47,9 +47,7 @@ public class GameTimer {
 
         } catch (Exception e) {
             hasThrownException = true;
-            e.printStackTrace();
-            Logger.error(e);
-
+            Log.exception(e);
         }
     }
 
@@ -104,5 +102,4 @@ public class GameTimer {
     public long getInterval() {
         return interval;
     }
-
 }

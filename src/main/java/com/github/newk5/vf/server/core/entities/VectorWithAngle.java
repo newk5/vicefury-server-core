@@ -59,5 +59,4 @@ public class VectorWithAngle {
     public String toString() {
         return "VectorWithAngle{" + "x=" + x + ", y=" + y + ", z=" + z + ", yawAngle=" + yawAngle + '}';
     }
-
 }

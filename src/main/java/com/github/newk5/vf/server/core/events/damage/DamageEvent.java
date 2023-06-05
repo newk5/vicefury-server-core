@@ -1,10 +1,10 @@
 package com.github.newk5.vf.server.core.events.damage;
 
+import com.github.newk5.vf.server.core.InternalServerEvents;
 import com.github.newk5.vf.server.core.entities.GameEntityType;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
-import com.github.newk5.vf.server.core.InternalServerEvents;
 
 public class DamageEvent {
 
@@ -125,5 +125,4 @@ public class DamageEvent {
     public void setDamageToApply(float damageToApply) {
         this.damageToApply = damageToApply;
     }
-
 }

@@ -3,34 +3,20 @@ package com.github.newk5.vf.server.core.commands;
 import com.github.newk5.vf.server.core.InternalServerEvents;
 import com.github.newk5.vf.server.core.commands.annotations.Command;
 import com.github.newk5.vf.server.core.commands.annotations.CommandController;
-import com.github.newk5.vf.server.core.commands.resolvers.BaseTypeResolver;
-import com.github.newk5.vf.server.core.commands.resolvers.BooleanResolver;
-import com.github.newk5.vf.server.core.commands.resolvers.DoubleResolver;
-import com.github.newk5.vf.server.core.commands.resolvers.FloatResolver;
-import com.github.newk5.vf.server.core.commands.resolvers.IntegerResolver;
-import com.github.newk5.vf.server.core.commands.resolvers.LongResolver;
-import com.github.newk5.vf.server.core.commands.resolvers.NPCResolver;
-import com.github.newk5.vf.server.core.commands.resolvers.PlayerResolver;
-import com.github.newk5.vf.server.core.commands.resolvers.StringResolver;
-import com.github.newk5.vf.server.core.commands.resolvers.VehicleResolver;
+import com.github.newk5.vf.server.core.commands.resolvers.*;
 import com.github.newk5.vf.server.core.controllers.commands.ServerCommandController;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
 import com.github.newk5.vf.server.core.exceptions.CommandParamCountException;
 import com.github.newk5.vf.server.core.exceptions.InvalidParameterTypeException;
+import com.github.newk5.vf.server.core.utils.Log;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.fusesource.jansi.Ansi;
-import static org.fusesource.jansi.Ansi.ansi;
-import org.tinylog.Logger;
 
 public class CommandRegistry {
 
@@ -43,7 +29,7 @@ public class CommandRegistry {
 
     int index = 0;
 
-    public void initilizeResolvers() {
+    public void initializeResolvers() {
         BooleanResolver bools = new BooleanResolver();
         FloatResolver floats = new FloatResolver();
         DoubleResolver doubles = new DoubleResolver();
@@ -112,9 +98,8 @@ public class CommandRegistry {
                         cmdIndexCache.put(cmd.getName(), index);
                     } else {
                         String cmdController = cmd.getCommandController() != null ? cmd.getCommandController().getClass().getName() : "";
-                        String msg = "WARNING: DUPLICATE COMMANDS FOR COMMAND: " + cmd.getName() + " FOUND, SKIPPED: " + cmdController + " " + cmd.getName();
-                        warn(msg);
-                        Logger.warn(msg);
+
+                        Log.warn("DUPLICATE COMMANDS FOR COMMAND: %s FOUND, SKIPPED: %s %s", cmd.getName(), cmdController, cmd.getName());
                     }
 
                     cmd.getAlias().forEach(cmdAlias -> {
@@ -124,40 +109,20 @@ public class CommandRegistry {
                         } else {
                             String cmdController = cmd.getCommandController() != null ? cmd.getCommandController().getClass().getName() : "";
 
-                            String msg = "WARNING: DUPLICATE COMMANDS FOR COMMAND: " + cmd.getName() + " FOUND, SKIPPED: " + cmdController + " " + cmd.getName();
-                            warn(msg);
-                            Logger.warn(msg);
+                            Log.warn("DUPLICATE COMMANDS FOR COMMAND: %s FOUND, SKIPPED: %s %s", cmd.getName(), cmdController, cmd.getName());
                         }
                     });
                     index++;
-                } else {
-
-                    String msg = "WARNING: IGNORED COMMAND: " + m.getDeclaringClass().getName() + "." + m.getName() + " MARKED WITH COMMAND ANNOTATION, BUT WITHOUT PLAYER PARAMETER ";
-
-                    warn(msg);
-                    Logger.warn(msg);
                 }
+                else Log.warn("IGNORED COMMAND: %s.%s MARKED WITH COMMAND ANNOTATION, BUT WITHOUT PLAYER PARAMETER", m.getDeclaringClass().getName(), m.getName());
             });
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Logger.error(e);
         }
-    }
-
-    private void warn(String m) {
-        System.out.println(ansi().fg(Ansi.Color.YELLOW).a(m).reset());
-    }
-
-    private void error(String m) {
-        System.out.println(ansi().fg(Ansi.Color.RED).a(m).reset());
+        catch (Exception e) { Log.exception(e); }
     }
 
     private boolean firstParamIsPlayer(Method m) {
         if (m.getParameterCount() > 0) {
-            if (m.getParameters()[0].getType() == Player.class) {
-                return true;
-            }
+            return m.getParameters()[0].getType() == Player.class;
         }
         return false;
     }
@@ -176,14 +141,12 @@ public class CommandRegistry {
         Parameter firstParam = m.getParameters()[0];
 
         Stream.of(m.getParameters()).filter(p -> p != firstParam).forEach(param -> {
-
             boolean isLastParam = lastParam != null && lastParam.equals(param);
             CommandParam p = new CommandParam(cmd, this, false, param.getType(), isLastParam);
             p.setParam(param);
 
             p.setOptional(cmdAn.allParamsAreOptional() ? true : isLastParam && cmdAn.lastParamIsOptional());
             params.add(p);
-
         });
         cmd.setParams(params);
         allCommands.add(cmd);
@@ -196,10 +159,8 @@ public class CommandRegistry {
         Integer index = cmdIndexCache.get(cmdName);
 
         ServerCommand cmd = index != null ? allCommands.get(index) : null;
-
         if (cmd != null) {
             try {
-
                 if (cmd.getControllerAnn().requiresAuthentication()) {
                     if (p == null || !p.isAuthenticated()) {
                         cmd.getCommandController().onAuthCheckFailed(p, input.split(" ")[0], input);
@@ -221,27 +182,21 @@ public class CommandRegistry {
                     System.arraycopy(params, 0, merged, player.length, params.length);
                     cmd.runCommand(merged);
                 }
-
-            } catch (Exception e) {
-
+            }
+            catch (Exception e) {
                 if (e instanceof CommandParamCountException && totalParams == 0) {
                     if (logExceptionsWhenCmdsAreUsedWithoutParams) {
-                        e.printStackTrace();
-                        Logger.error(e);
+                        Log.exception(e);
                     }
                 } else {
-                    e.printStackTrace();
-                    Logger.error(e);
+                    Log.exception(e);
                 }
 
                 if (e instanceof CommandParamCountException || e instanceof InvalidParameterTypeException) {
-
                     cmd.getCommandController().onCommandSyntaxIncorrect(p, input.split(" ")[0], input, cmd.getCommandAnn().syntax());
-
                 }
                 cmd.getCommandController().onException(p, e, input);
             }
         }
-
     }
 }

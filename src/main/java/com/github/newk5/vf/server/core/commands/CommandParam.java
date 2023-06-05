@@ -4,6 +4,7 @@ import com.github.newk5.vf.server.core.commands.annotations.Resolve;
 import com.github.newk5.vf.server.core.commands.resolvers.BaseTypeResolver;
 import com.github.newk5.vf.server.core.exceptions.CommandTypeResolverNotFound;
 import com.github.newk5.vf.server.core.exceptions.InvalidParameterTypeException;
+
 import java.lang.reflect.Parameter;
 
 public class CommandParam {
@@ -29,7 +30,6 @@ public class CommandParam {
             r = registry.getNamedResolver(rr.value());
             if (r == null) {
                 throw new CommandTypeResolverNotFound("Failed to find Named Resolver '"+rr.value()+"' for datatype: " + type.getName() + ", if you want to be able to resolve this datatype, register a new namedResolver using the commandRegistry#registerNamedResolver method");
-
             }
         } else {
             r = registry.getTypeResolver(type);
@@ -95,5 +95,4 @@ public class CommandParam {
     public void setType(Class type) {
         this.type = type;
     }
-
 }

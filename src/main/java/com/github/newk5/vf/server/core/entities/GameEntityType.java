@@ -19,5 +19,4 @@ public enum GameEntityType {
         }
         return null;
     }
-
 }

@@ -57,5 +57,4 @@ public class NPCSpawnProps {
     public void withController(Class controllerClass) {
         this.controllerClass = controllerClass;
     }
-
 }

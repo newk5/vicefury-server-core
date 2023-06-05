@@ -1,14 +1,14 @@
 package com.github.newk5.vf.server.core.exceptions;
 
-import org.tinylog.Logger;
+import com.github.newk5.vf.server.core.utils.Log;
 
 public class PluginExceptionHandler {
-   public void throwEx(Throwable e) {
-      Logger.error(e);
-      e.printStackTrace();
-   }
-   public void notifyExitCode(int exitCode, String message){
-       Logger.error(message+": "+exitCode);
-       System.out.println(message+": "+exitCode);
-   }
+
+    public void throwEx(Throwable e) {
+        Log.exception(e);
+    }
+
+    public void notifyExitCode(int exitCode, String message) {
+        Log.error("%s: %d", message, exitCode);
+    }
 }

@@ -66,5 +66,4 @@ public class Transform {
     public String toString() {
         return "Transform{" + "location=" + position + ", rotation=" + rotation + '}';
     }
-
 }

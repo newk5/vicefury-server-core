@@ -1,11 +1,7 @@
 package com.github.newk5.vf.server.core.entities.vehicle;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
-import com.github.newk5.vf.server.core.entities.GameEntity;
-import com.github.newk5.vf.server.core.entities.GameEntityType;
-import com.github.newk5.vf.server.core.entities.Rotation;
-import com.github.newk5.vf.server.core.entities.Transform;
-import com.github.newk5.vf.server.core.entities.Vector;
+import com.github.newk5.vf.server.core.entities.*;
 import com.github.newk5.vf.server.core.entities.player.Player;
 
 public class Vehicle extends GameEntity {
@@ -14,7 +10,6 @@ public class Vehicle extends GameEntity {
         super();
         this.id = id;
         type = GameEntityType.VEHICLE;
-
     }
 
     private native int nativeGetDriver(int id);
@@ -189,5 +184,4 @@ public class Vehicle extends GameEntity {
     public String toString() {
         return "Vehicle{ id=" + id + '}';
     }
-
 }
