@@ -12,7 +12,6 @@ import com.github.newk5.vf.server.core.events.damage.DamageEvent;
 import java.net.URLClassLoader;
 
 public abstract class BaseServerEvents {
-
     public URLClassLoader classLoader;
     public Server server;
 
@@ -44,7 +43,7 @@ public abstract class BaseServerEvents {
         return null;
     }
 
-    public void onPlayerSpawnScreenSkinChange(Player player, int SkinId) {
+    public void onPlayerSpawnScreenSkinChange(Player player, int skinId) {
 
     }
 
@@ -52,7 +51,7 @@ public abstract class BaseServerEvents {
 
     }
 
-    public void onPlayerDied(Player player, DamageEvent DmgEvent) {
+    public void onPlayerDied(Player player, DamageEvent damageEvent) {
 
     }
 
@@ -60,7 +59,7 @@ public abstract class BaseServerEvents {
         return null;
     }
 
-    public void onPlayerCommand(Player player, final String message) {
+    public void onPlayerCommand(Player player, String command) {
 
     }
 
@@ -68,23 +67,23 @@ public abstract class BaseServerEvents {
 
     }
 
-    public Float onPlayerReceiveDamage(Player player, DamageEvent ev) {
+    public Float onPlayerReceiveDamage(Player player, DamageEvent damageEvent) {
         return null;
     }
 
-    public void onPlayerEnterVehicle(Player player, Vehicle v, boolean asDriver) {
+    public void onPlayerEnterVehicle(Player player, Vehicle vehicle, boolean asDriver) {
 
     }
 
-    public void onPlayerLeaveVehicle(Player player, Vehicle v, boolean asDriver) {
+    public void onPlayerLeaveVehicle(Player player, Vehicle vehicle, boolean asDriver) {
 
     }
 
-    public void onVehicleCreated(Vehicle v) {
+    public void onVehicleCreated(Vehicle vehicle) {
 
     }
 
-    public void onVehicleDestroyed(Vehicle v) {
+    public void onVehicleDestroyed(Vehicle vehicle) {
 
     }
 
@@ -92,8 +91,7 @@ public abstract class BaseServerEvents {
 
     }
 
-    public Float onVehicleReceiveDamage(Vehicle veh, DamageEvent ev) {
-
+    public Float onVehicleReceiveDamage(Vehicle vehicle, DamageEvent damageEvent) {
         return null;
     }
 
@@ -109,11 +107,11 @@ public abstract class BaseServerEvents {
 
     }
 
-    public void onNpcDied(NPC npc, DamageEvent ev) {
+    public void onNpcDied(NPC npc, DamageEvent damageEvent) {
 
     }
 
-    public Float onNpcReceiveDamage(NPC npc, DamageEvent ev) {
+    public Float onNpcReceiveDamage(NPC npc, DamageEvent damageEvent) {
 
         return null;
     }
@@ -122,11 +120,11 @@ public abstract class BaseServerEvents {
 
     }
 
-    public Boolean onNpcGainedSightOf(NPC npc, GameEntity e) {
+    public Boolean onNpcGainedSightOf(NPC npc, GameEntity entity) {
         return null;
     }
 
-    public Boolean onNpcLostSightOf(NPC npc, GameEntity e) {
+    public Boolean onNpcLostSightOf(NPC npc, GameEntity entity) {
         return null;
     }
 

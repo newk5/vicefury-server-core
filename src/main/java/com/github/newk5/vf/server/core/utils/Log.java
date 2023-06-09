@@ -25,15 +25,20 @@ public class Log {
     }
 
     private static void print(Type type, String message) {
-        try { AnsiConsole.out.println(ansi().fg(type.color).a(type.tag +" ").reset().a(message)); }
-        catch (Exception e) { exception(e); }
+        AnsiConsole.out.println(ansi().fg(type.color).a(type.tag +" ").reset().a(message));
     }
 
     private static String format(Object message, Object...args) {
         String msg = "";
         try { msg = String.format(String.valueOf(message), args); }
-        catch (Exception e) { exception(e); }
+        catch (Exception e) {
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
+            print(Type.ERR, String.format("An unexpected error has occurred: %s", e));
+            for (int i = 3; i < stackTrace.length; i++) {
+                print(Type.ERR, String.format("\t\tat %s", stackTrace[i]));
+            }
+        }
         return msg;
     }
 
@@ -46,13 +51,17 @@ public class Log {
         }
     }
 
-    public static void exception(Exception e) {
+    public static void exception(Exception e, Object message, Object... args) {
         StackTraceElement[] stackTrace = e.getStackTrace();
 
-        error("An unexpected error has occurred: %s", e.getMessage());
+        error("An unexpected error has occurred: %s", format(message, args));
         for (StackTraceElement element : stackTrace) {
             error("\t\tat %s", element);
         }
+    }
+
+    public static void exception(Exception e) {
+        exception(e, e.getMessage());
     }
 
     public static void info(Object message, Object... args) {
