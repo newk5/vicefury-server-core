@@ -47,6 +47,10 @@ public class Events {
         return null;
     }
 
+    public static void clear() {
+        eventHandlers.clear();
+    }
+
     public static void clear(String eventName) {
         String key = eventName.toLowerCase();
 
