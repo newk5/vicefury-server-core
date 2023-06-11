@@ -95,11 +95,9 @@ public class Events {
 
         private EventEntry(String eventName) {
             this.eventName = eventName;
-            Log.debug("%s created", eventName);
         }
 
         public boolean isEmpty() {
-            Log.debug("%s is empty", eventName);
             return this.callbacks.isEmpty();
         }
 
@@ -112,7 +110,6 @@ public class Events {
         }
 
         private void addCallback(EventCallback callback) {
-            Log.debug("Event: %s, Callback : %s", eventName, callback);
             if(!this.callbacks.contains(callback)) {
                 if(!this.isEmpty() && this.callbacks.get(0).getClass().getInterfaces()[0] != callback.getClass().getInterfaces()[0]) {
                     Log.exception("Unable to connect callback for event: %s (Cannot have arguments/return-type different than the first callback connected)", this.eventName);
