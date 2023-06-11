@@ -1,15 +1,15 @@
 package com.github.newk5.vf.server.core;
 
-import com.github.newk5.vf.server.core.controllers.ai.NPCController;
-import com.github.newk5.vf.server.core.controllers.client.ClientChannelController;
+import com.github.newk5.vf.server.core.controllers.BaseEventController;
+import com.github.newk5.vf.server.core.controllers.NPCController;
+import com.github.newk5.vf.server.core.controllers.ClientChannelController;
 import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.GameEntityType;
-import com.github.newk5.vf.server.core.entities.NPCAction;
+import com.github.newk5.vf.server.core.entities.npc.NPCAction;
 import com.github.newk5.vf.server.core.entities.Vector;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
-import com.github.newk5.vf.server.core.events.BaseServerEvents;
 import com.github.newk5.vf.server.core.events.EventName;
 import com.github.newk5.vf.server.core.events.Events;
 import com.github.newk5.vf.server.core.events.damage.DamageEvent;
@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 
 public class InternalServerEvents {
 
-    private Map<String, BaseServerEvents> eventHandlers = new HashMap<>();
+    private Map<String, BaseEventController> eventHandlers = new HashMap<>();
     public static Map<String, ClientChannelController> channelControllers = new HashMap<>();
     private static DamageEvent damageEvent = new DamageEvent();
     public static Server server;
@@ -48,7 +48,7 @@ public class InternalServerEvents {
         server = null;
     }
 
-    public void addEventHandler(String name, BaseServerEvents baseEvents) {
+    public void addEventHandler(String name, BaseEventController baseEvents) {
         eventHandlers.put(name, baseEvents);
     }
 
@@ -150,7 +150,7 @@ public class InternalServerEvents {
     }
 
     public boolean onPlayerRequestSpawn(Player player) {
-        for (Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
+        for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             try {
                 Boolean value = entry.getValue().onPlayerRequestSpawn(player);
                 if (value != null) {
@@ -193,7 +193,7 @@ public class InternalServerEvents {
     }
 
     public boolean onPlayerMessage(Player player, String message) {
-        for (Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
+        for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             try {
                 Boolean value = entry.getValue().onPlayerMessage(player, message);
                 if (value != null) {
@@ -240,7 +240,7 @@ public class InternalServerEvents {
     }
 
     public Float onPlayerReceiveDamage(Player player, DamageEvent damageEvent) {
-        for (Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
+        for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             try {
                 Float newValue = entry.getValue().onPlayerReceiveDamage(player, damageEvent);
                 if (newValue != null) {
@@ -308,7 +308,7 @@ public class InternalServerEvents {
     }
 
     public Float onVehicleReceiveDamage(Vehicle vehicle, DamageEvent damageEvent) {
-        for (Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
+        for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             try {
                 Float newValue = entry.getValue().onVehicleReceiveDamage(vehicle, damageEvent);
                 if (newValue != null) {
@@ -395,7 +395,7 @@ public class InternalServerEvents {
         NPCController c = npc.getController();
 
         if(c == null) {
-            for (Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
+            for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
                 try {
                     Float newValue = entry.getValue().onNpcReceiveDamage(npc, damageEvent);
                     if (newValue != null) {
@@ -443,7 +443,7 @@ public class InternalServerEvents {
         NPCController c = npc.getController();
 
         if (c == null) {
-            for (Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
+            for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
                 try {
                     Boolean value = entry.getValue().onNpcGainedSightOf(npc, entity);
                     if(value != null) {
@@ -474,7 +474,7 @@ public class InternalServerEvents {
         NPCController c = npc.getController();
 
         if (c == null) {
-            for (Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
+            for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
                 try {
                     Boolean value = entry.getValue().onNpcLostSightOf(npc, entity);
                     if(value != null) {
@@ -499,7 +499,7 @@ public class InternalServerEvents {
 
         NPCController c = npc.getController();
         if (c == null) {
-            for (Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
+            for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
                 try {
                     Boolean value = entry.getValue().onNpcHeardNoise(npc, cachedNPCNoiseVector);
                     if(value != null) {

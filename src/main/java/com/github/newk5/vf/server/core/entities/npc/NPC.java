@@ -1,7 +1,7 @@
 package com.github.newk5.vf.server.core.entities.npc;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
-import com.github.newk5.vf.server.core.controllers.ai.NPCController;
+import com.github.newk5.vf.server.core.controllers.NPCController;
 import com.github.newk5.vf.server.core.entities.*;
 import com.github.newk5.vf.server.core.utils.Log;
 

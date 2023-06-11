@@ -1,4 +1,4 @@
-package com.github.newk5.vf.server.core.entities;
+package com.github.newk5.vf.server.core.entities.npc;
 
 public enum NPCAction {
     NONE(0), 
