@@ -1,9 +1,9 @@
-package com.github.newk5.vf.server.core.controllers.ai;
+package com.github.newk5.vf.server.core.controllers;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
 import com.github.newk5.vf.server.core.Server;
 import com.github.newk5.vf.server.core.entities.GameEntity;
-import com.github.newk5.vf.server.core.entities.NPCAction;
+import com.github.newk5.vf.server.core.entities.npc.NPCAction;
 import com.github.newk5.vf.server.core.entities.Vector;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.events.damage.DamageEvent;

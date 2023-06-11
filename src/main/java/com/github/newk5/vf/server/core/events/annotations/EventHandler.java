@@ -1,4 +1,4 @@
-package com.github.newk5.vf.server.core.commands.annotations;
+package com.github.newk5.vf.server.core.events.annotations;
 
 import org.atteo.classindex.IndexAnnotated;
 
@@ -10,8 +10,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @IndexAnnotated
-public @interface CommandController {
-
-    public String name() default "";
-    public boolean requiresAuthentication() default false;
+public @interface EventHandler {
 }

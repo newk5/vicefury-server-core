@@ -1,13 +1,13 @@
-package com.github.newk5.vf.server.core.controllers.commands;
+package com.github.newk5.vf.server.core.controllers;
 
 import com.github.newk5.vf.server.core.Server;
 import com.github.newk5.vf.server.core.entities.player.Player;
 
-public abstract class ServerCommandController {
+public abstract class CommandController {
 
     protected Server server;
 
-    public ServerCommandController(Server server) {
+    public CommandController(Server server) {
         this.server = server;
     }
 

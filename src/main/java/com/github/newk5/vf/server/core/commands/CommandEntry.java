@@ -1,8 +1,8 @@
 package com.github.newk5.vf.server.core.commands;
 
 import com.github.newk5.vf.server.core.commands.annotations.Command;
-import com.github.newk5.vf.server.core.commands.annotations.CommandController;
-import com.github.newk5.vf.server.core.controllers.commands.ServerCommandController;
+import com.github.newk5.vf.server.core.commands.annotations.CommandHandler;
+import com.github.newk5.vf.server.core.controllers.CommandController;
 import com.github.newk5.vf.server.core.exceptions.CommandParamCountException;
 import com.github.newk5.vf.server.core.exceptions.CommandTypeResolverNotFound;
 import com.github.newk5.vf.server.core.exceptions.InvalidParameterTypeException;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ServerCommand {
+public class CommandEntry {
 
     private int index;
     private String name;
@@ -22,15 +22,15 @@ public class ServerCommand {
     private boolean requiresAuth;
     public int paramCount;
     private List<CommandParam> params;
-    private ServerCommandController commandController;
-    private CommandController controllerAnn;
+    private CommandController commandController;
+    private CommandHandler controllerAnn;
     private Command commandAnn;
     private Method method;
 
-    public ServerCommand() {
+    public CommandEntry() {
     }
 
-    public ServerCommand(String name, List<String> alias, boolean requiresAuth, int paramCount) {
+    public CommandEntry(String name, List<String> alias, boolean requiresAuth, int paramCount) {
         this.name = name;
         this.alias = alias;
         this.requiresAuth = requiresAuth;
@@ -91,19 +91,19 @@ public class ServerCommand {
         this.index = index;
     }
 
-    public ServerCommandController getCommandController() {
+    public CommandController getCommandController() {
         return commandController;
     }
 
-    public void setCommandController(ServerCommandController commandController) {
+    public void setCommandController(CommandController commandController) {
         this.commandController = commandController;
     }
 
-    public CommandController getControllerAnn() {
+    public CommandHandler getControllerAnn() {
         return controllerAnn;
     }
 
-    public void setControllerAnn(CommandController controllerAnn) {
+    public void setControllerAnn(CommandHandler controllerAnn) {
         this.controllerAnn = controllerAnn;
     }
 

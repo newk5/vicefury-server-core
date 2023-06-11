@@ -1,10 +1,10 @@
 package com.github.newk5.vf.server.core;
 
-import com.github.newk5.vf.server.core.client.ChannelController;
-import com.github.newk5.vf.server.core.commands.annotations.CommandController;
-import com.github.newk5.vf.server.core.controllers.client.ClientChannelController;
-import com.github.newk5.vf.server.core.events.BaseServerEvents;
-import com.github.newk5.vf.server.core.events.ServerEventHandler;
+import com.github.newk5.vf.server.core.client.annotations.ClientChannelHandler;
+import com.github.newk5.vf.server.core.commands.annotations.CommandHandler;
+import com.github.newk5.vf.server.core.controllers.BaseEventController;
+import com.github.newk5.vf.server.core.controllers.ClientChannelController;
+import com.github.newk5.vf.server.core.events.annotations.EventHandler;
 import com.github.newk5.vf.server.core.utils.Log;
 import org.atteo.classindex.ClassIndex;
 import org.fusesource.jansi.AnsiConsole;
@@ -45,13 +45,13 @@ public class PluginLoader {
     }
 
     public void loadClientControllers(Server server) {
-        Iterator it = ClassIndex.getAnnotated(ChannelController.class).iterator();
+        Iterator it = ClassIndex.getAnnotated(ClientChannelHandler.class).iterator();
 
         while (it.hasNext()) {
             try {
                 Class c = (Class) it.next();
                 ClientChannelController ev = (ClientChannelController) c.getConstructors()[0].newInstance(server);
-                InternalServerEvents.channelControllers.put(ev.getClass().getAnnotation(ChannelController.class).value(), ev);
+                InternalServerEvents.channelControllers.put(ev.getClass().getAnnotation(ClientChannelHandler.class).value(), ev);
             }
             catch (Exception e) { Log.exception(e); }
         }
@@ -59,18 +59,18 @@ public class PluginLoader {
 
     public void loadCommandControllers(Server server) {
         server.commandRegistry.initializeResolvers();
-        for (Class<?> c : ClassIndex.getAnnotated(CommandController.class)) {
+        for (Class<?> c : ClassIndex.getAnnotated(CommandHandler.class)) {
             server.commandRegistry.registerController(c);
         }
     }
 
     public void loadEvents(InternalServerEvents events, Server server) {
-        Iterator it = ClassIndex.getAnnotated(ServerEventHandler.class).iterator();
+        Iterator it = ClassIndex.getAnnotated(EventHandler.class).iterator();
 
         while (it.hasNext()) {
             try {
                 Class c = (Class) it.next();
-                BaseServerEvents ev = (BaseServerEvents) c.getConstructors()[0].newInstance();
+                BaseEventController ev = (BaseEventController) c.getConstructors()[0].newInstance();
                 ev.server = server;
                 InternalServerEvents.server = server;
                 events.addEventHandler(c.getName(), ev);
