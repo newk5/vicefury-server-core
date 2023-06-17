@@ -5,6 +5,7 @@ import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.GameEntityType;
 import com.github.newk5.vf.server.core.entities.NPCAction;
 import com.github.newk5.vf.server.core.entities.Vector;
+import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
@@ -25,13 +26,15 @@ public class InternalServerEvents {
     public static Server server;
     protected static List<Player> allPlayers = new ArrayList<>();
     protected static List<Vehicle> allVehicles = new ArrayList<>();
+    protected static List<GameObject> allObjects = new ArrayList<>();
     protected static List<NPC> allNpcs = new ArrayList<>();
     protected static final Queue<Runnable> queue = new ConcurrentLinkedQueue<>();
     protected static List<GameTimer> timers = new ArrayList<>();
     public static Consumer<Exception> onException;
     private Vector cachedNPCNoiseVector = new Vector();
 
-    public InternalServerEvents() { }
+    public InternalServerEvents() {
+    }
 
     protected void clearData() {
         eventHandlers.clear();
@@ -87,8 +90,9 @@ public class InternalServerEvents {
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onServerStart();
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         });
     }
 
@@ -96,8 +100,9 @@ public class InternalServerEvents {
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onServerShutdown();
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         });
 
     }
@@ -115,8 +120,9 @@ public class InternalServerEvents {
                 final BaseServerEvents handler = e.getValue();
                 handler.onTick();
             }
+        } catch (final Exception e) {
+            catchException(e);
         }
-        catch (final Exception e) { catchException(e); }
     }
 
     public void onPlayerJoin(final Player player) {
@@ -125,8 +131,9 @@ public class InternalServerEvents {
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onPlayerJoin(player);
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         });
     }
 
@@ -137,20 +144,23 @@ public class InternalServerEvents {
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onPlayerLeave(player);
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         });
     }
 
     public boolean onPlayerRequestSpawn(Player player) {
+
         for (final Map.Entry<String, BaseServerEvents> e : eventHandlers.entrySet()) {
             try {
                 Boolean v = e.getValue().onPlayerRequestSpawn(player);
                 if (v != null) {
                     return v;
                 }
+            } catch (final Exception ex) {
+                catchException(ex);
             }
-            catch (final Exception ex) { catchException(ex); }
         }
         return true;
     }
@@ -159,8 +169,9 @@ public class InternalServerEvents {
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onPlayerSpawnScreenSkinChange(player, SkinId);
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         });
     }
 
@@ -168,8 +179,9 @@ public class InternalServerEvents {
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onPlayerSpawn(player);
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         });
     }
 
@@ -179,8 +191,9 @@ public class InternalServerEvents {
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onPlayerDied(player, damageEvent);
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         });
     }
 
@@ -193,8 +206,9 @@ public class InternalServerEvents {
                 if (canSendMessage != null) {
                     return canSendMessage;
                 }
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         }
         return true;
     }
@@ -202,13 +216,15 @@ public class InternalServerEvents {
     public void onPlayerCommand(final Player player, final String message) {
         try {
             server.commandRegistry.process(player, message);
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {
+        }
 
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onPlayerCommand(player, message);
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         });
     }
 
@@ -221,8 +237,9 @@ public class InternalServerEvents {
                 try {
                     final BaseServerEvents handler = entry.getValue();
                     handler.onDataReceived(player, channel, data);
+                } catch (final Exception e) {
+                    catchException(e);
                 }
-                catch (final Exception e) { catchException(e); }
             }
         }
     }
@@ -240,8 +257,9 @@ public class InternalServerEvents {
                 if (newValue != null) {
                     return newValue;
                 }
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         }
         return ev.getDamageToApply();
     }
@@ -250,8 +268,9 @@ public class InternalServerEvents {
         for (Entry<String, BaseServerEvents> handler : eventHandlers.entrySet()) {
             try {
                 handler.getValue().onPlayerEnterVehicle(player, v, asDriver);
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         }
     }
 
@@ -259,8 +278,9 @@ public class InternalServerEvents {
         for (Entry<String, BaseServerEvents> handler : eventHandlers.entrySet()) {
             try {
                 handler.getValue().onPlayerLeaveVehicle(player, v, asDriver);
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         }
     }
 
@@ -269,8 +289,9 @@ public class InternalServerEvents {
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onVehicleCreated(v);
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         });
     }
 
@@ -280,8 +301,9 @@ public class InternalServerEvents {
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onVehicleDestroyed(v);
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         });
     }
 
@@ -289,8 +311,9 @@ public class InternalServerEvents {
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onVehicleExploded(vehicle);
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         });
     }
 
@@ -307,8 +330,9 @@ public class InternalServerEvents {
                 if (newValue != null) {
                     return newValue;
                 }
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         }
         return ev.getDamageToApply();
     }
@@ -325,8 +349,9 @@ public class InternalServerEvents {
                     handler.onNpcCreated(npc);
                 }
             }
+        } catch (final Exception e) {
+            catchException(e);
         }
-        catch (final Exception e) { catchException(e); }
     }
 
     public void onNPCDestroyed(final NPC npc) {
@@ -342,8 +367,9 @@ public class InternalServerEvents {
                     handler.onNpcDestroy(npc);
                 }
             }
+        } catch (final Exception e) {
+            catchException(e);
         }
-        catch (final Exception e) { catchException(e); }
     }
 
     public void onNPCSpawned(final NPC npc) {
@@ -357,8 +383,9 @@ public class InternalServerEvents {
                     handler.onNpcSpawned(npc);
                 }
             }
+        } catch (final Exception e) {
+            catchException(e);
         }
-        catch (final Exception e) { catchException(e); }
     }
 
     public void onNPCDied(final NPC npc, int source, int sourceId, int DamagedByEntity, int damagedById, float damageToApply) {
@@ -374,8 +401,9 @@ public class InternalServerEvents {
                     npc.getController().onDeath(ev);
                 }
                 handler.getValue().onNpcDied(npc, ev);
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         }
     }
 
@@ -392,8 +420,9 @@ public class InternalServerEvents {
                 if (newValue != null) {
                     return newValue;
                 }
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         }
         return ev.getDamageToApply();
     }
@@ -409,8 +438,9 @@ public class InternalServerEvents {
                 } else {
                     handler.onNpcActionChanged(npc, NPCAction.value(oldAct), NPCAction.value(newAct));
                 }
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         }
     }
 
@@ -436,8 +466,9 @@ public class InternalServerEvents {
                 if (ack != null) {
                     return ack;
                 }
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         }
         return true;
     }
@@ -463,8 +494,9 @@ public class InternalServerEvents {
                 if (ack != null) {
                     return ack;
                 }
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         }
         return true;
     }
@@ -486,9 +518,89 @@ public class InternalServerEvents {
                 if (ack != null) {
                     return ack;
                 }
+            } catch (final Exception e) {
+                catchException(e);
             }
-            catch (final Exception e) { catchException(e); }
         }
         return true;
+    }
+
+    public void onObjectCreated(GameObject o) {
+        allObjects.add(o);
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                handler.onObjectCreated(o);
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+    }
+
+    public void onObjectDestroyed(GameObject obj) {
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                handler.onObjectDestroyed(obj);
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        clearGameEntityData(obj);
+        allObjects.remove(obj);
+    }
+
+    public float onObjectReceiveDamage(GameObject obj, int source, int sourceId, int DamagedByEntity, int damagedById, float damageToApply) {
+        damageEvent.applyValues(source, sourceId, DamagedByEntity, damagedById, damageToApply);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                handler.onObjectReceiveDamage(obj, damageEvent);
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        return damageToApply;
+    }
+
+    public void onObjectTouched(GameObject obj, int entityType, int gameEntityId) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                GameEntityType t = GameEntityType.value(entityType);
+
+                GameEntity ent = null;
+                if (null != t) {
+                    switch (t) {
+                        case NPC:
+                            ent = InternalServerEvents.server.getNPC(gameEntityId);
+                            break;
+                        case OBJECT:
+                            ent = InternalServerEvents.server.getObject(gameEntityId);
+                            break;
+                        case VEHICLE:
+                            ent = InternalServerEvents.server.getVehicle(gameEntityId);
+                            break;
+                        case PLAYER:
+                            ent = InternalServerEvents.server.getPlayer(gameEntityId);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                handler.onObjectTouched(obj, ent);
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+
+    }
+
+    public void onObjectBroken(GameObject obj) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                handler.onObjectBroken(obj);
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
     }
 }

@@ -20,6 +20,7 @@ public class PluginLoader {
 
     public static InternalServerEvents baseEvents;
     public static String launchPath;
+    
 
     public PluginLoader() { }
 

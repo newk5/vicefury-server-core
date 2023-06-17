@@ -25,6 +25,25 @@ public class Player extends GameEntity {
         this.authenticated = authenticated;
     }
 
+    private native String nativeGetBoneNames(int id);
+
+    public String getBoneNames() {
+        return threadIsValid() ? this.nativeGetBoneNames(this.id) : null;
+    }
+
+    private native void nativeDetachAllObjects(int id);
+
+    public Player detachAllObjects() {
+        if (isOnMainThread()) {
+            nativeDetachAllObjects(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeDetachAllObjects(id);
+            });
+        }
+        return this;
+    }
+
     private native Vehicle nativeGetVehicle(int id);
 
     public Vehicle getVehicle() {

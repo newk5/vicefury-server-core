@@ -3,7 +3,8 @@ package com.github.newk5.vf.server.core.entities;
 public enum GameEntityType {
     PLAYER(1),
     VEHICLE(2),
-    NPC(3);
+    NPC(3),
+    OBJECT(4);
 
     public final Integer value;
 

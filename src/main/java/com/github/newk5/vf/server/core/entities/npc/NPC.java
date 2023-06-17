@@ -26,8 +26,9 @@ public class NPC extends GameEntity {
             try {
                 Object v = controllerClass.getConstructors()[0].newInstance(this);
                 this.controller = (NPCController) v;
+            } catch (Exception e) {
+                Log.exception(e);
             }
-            catch (Exception e) { Log.exception(e); }
         }
         return this;
     }
@@ -38,6 +39,15 @@ public class NPC extends GameEntity {
 
     public <T> T getCastedController() {
         return (T) controller;
+    }
+
+    public native boolean nativeCanMoveTo(int id, double x, double y, double z);
+
+    public boolean canMoveTo(Vector location) {
+        if (threadIsValid()) {
+            return nativeCanMoveTo(id, location.x, location.y, location.z);
+        }
+        return false;
     }
 
     public static NPCSpawnProps SpawnProperties() {
@@ -54,6 +64,25 @@ public class NPC extends GameEntity {
 
     public NPCType getNPCType() {
         return NPCType;
+    }
+
+    private native void nativeDetachAllObjects(int id);
+
+    public NPC detachAllObjects() {
+        if (isOnMainThread()) {
+            nativeDetachAllObjects(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeDetachAllObjects(id);
+            });
+        }
+        return this;
+    }
+
+    private native String nativeGetBoneNames(int id);
+
+    public String getBoneNames() {
+        return threadIsValid() ? this.nativeGetBoneNames(this.id) : null;
     }
 
     private native float nativeGetRespawnDelay(int id);

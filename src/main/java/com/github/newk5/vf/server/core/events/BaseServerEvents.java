@@ -4,6 +4,7 @@ import com.github.newk5.vf.server.core.Server;
 import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.NPCAction;
 import com.github.newk5.vf.server.core.entities.Vector;
+import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
@@ -132,6 +133,26 @@ public abstract class BaseServerEvents {
 
     public Boolean onNpcHeardNoise(NPC npc, Vector noiseLocation) {
         return null;
+
+    }
+
+    public void onObjectCreated(GameObject obj) {
+
+    }
+
+    public void onObjectDestroyed(GameObject obj) {
+
+    }
+
+    public Float onObjectReceiveDamage(GameObject obj, DamageEvent ev) {
+        return null;
+    }
+
+    public void onObjectTouched(GameObject obj, GameEntity gameEntity) {
+
+    }
+
+    public void onObjectBroken(GameObject obj) {
 
     }
 }

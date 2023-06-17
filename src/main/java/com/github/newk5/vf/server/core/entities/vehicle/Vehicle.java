@@ -12,6 +12,25 @@ public class Vehicle extends GameEntity {
         type = GameEntityType.VEHICLE;
     }
 
+    private native String nativeGetBoneNames(int id);
+
+    public String getBoneNames() {
+        return threadIsValid() ? this.nativeGetBoneNames(this.id) : null;
+    }
+
+    private native void nativeDetachAllObjects(int id);
+
+    public Vehicle detachAllObjects() {
+        if (isOnMainThread()) {
+            nativeDetachAllObjects(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeDetachAllObjects(id);
+            });
+        }
+        return this;
+    }
+
     private native int nativeGetDriver(int id);
 
     public Player getDriver() {

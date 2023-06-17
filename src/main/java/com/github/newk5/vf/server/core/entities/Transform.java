@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public class Transform {
 
-    public Vector position;
-    public Rotation rotation;
+    public Vector position = new Vector();
+    public Rotation rotation = new Rotation();
 
     public Transform() {
     }
