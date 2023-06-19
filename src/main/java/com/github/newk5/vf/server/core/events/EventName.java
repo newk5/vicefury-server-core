@@ -29,4 +29,9 @@ public interface EventName {
     String onNpcLostSightOf = "onNpcLostSightOf";
     String onNpcActionChanged = "onNpcActionChanged";
     String onNpcHeardNoise = "onNpcHeardNoise";
+    String onObjectCreated = "onObjectCreated";
+    String onObjectDestroyed = "onObjectDestroyed";
+    String onObjectReceiveDamage = "onObjectReceiveDamage";
+    String onObjectTouched = "onObjectTouched";
+    String onObjectBroken = "onObjectBroken";
 }

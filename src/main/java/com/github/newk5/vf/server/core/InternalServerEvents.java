@@ -1,14 +1,14 @@
 package com.github.newk5.vf.server.core;
 
 import com.github.newk5.vf.server.core.controllers.BaseEventController;
-import com.github.newk5.vf.server.core.controllers.NPCController;
 import com.github.newk5.vf.server.core.controllers.ClientChannelController;
+import com.github.newk5.vf.server.core.controllers.NPCController;
 import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.GameEntityType;
-import com.github.newk5.vf.server.core.entities.npc.NPCAction;
 import com.github.newk5.vf.server.core.entities.Vector;
 import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
+import com.github.newk5.vf.server.core.entities.npc.NPCAction;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
 import com.github.newk5.vf.server.core.events.EventName;
@@ -74,9 +74,7 @@ public class InternalServerEvents {
         sorted.forEach(ev->{
             temp.put(ev.getControllerName(), ev);
         });
-        
         eventHandlers = temp;
-        
     }
 
     private void catchException(Exception e) {
@@ -357,7 +355,6 @@ public class InternalServerEvents {
     }
 
     public void onVehicleDestroyed(Vehicle vehicle) {
-
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onVehicleDestroyed(vehicle);
@@ -366,6 +363,7 @@ public class InternalServerEvents {
             }
         });
         Events.emit(EventName.onVehicleDestroyed, vehicle);
+
         clearGameEntityData(vehicle);
         allVehicles.remove(vehicle);
     }
@@ -426,8 +424,8 @@ public class InternalServerEvents {
     }
 
     public void onNPCDestroyed(NPC npc) {
-
         NPCController c = npc.getController();
+
         if (c == null) {
             eventHandlers.forEach((name, handler) -> {
                 try {
@@ -540,7 +538,7 @@ public class InternalServerEvents {
     }
 
     public boolean onNPCGainedSightOf(NPC npc, int entityType, int entityId) {
-        GameEntity entity = server.getGameEntity(GameEntityType.value(entityType), entityId);
+        GameEntity entity = server.getGameEntity(entityType, entityId);
 
         if (entity != null) {
             return onNpcGainedSightOf(npc, entity);
@@ -575,7 +573,7 @@ public class InternalServerEvents {
     }
 
     public boolean onNPCLostSightOf(NPC npc, int entityType, int entityId) {
-        GameEntity entity = server.getGameEntity(GameEntityType.value(entityType), entityId);
+        GameEntity entity = server.getGameEntity(entityType, entityId);
 
         if (entity != null) {
             return onNpcLostSightOf(npc, entity);
@@ -636,19 +634,20 @@ public class InternalServerEvents {
         return true;
     }
 
-    public void onObjectCreated(GameObject o) {
-        allObjects.add(o);
+    public void onObjectCreated(GameObject obj) {
+        allObjects.add(obj);
+
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onObjectCreated(o);
+                handler.onObjectCreated(obj);
             } catch (Exception e) {
                 catchException(e);
             }
         });
+        Events.emit(EventName.onObjectCreated, obj);
     }
 
     public void onObjectDestroyed(GameObject obj) {
-
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onObjectDestroyed(obj);
@@ -656,53 +655,49 @@ public class InternalServerEvents {
                 catchException(e);
             }
         });
+        Events.emit(EventName.onObjectDestroyed, obj);
+
         clearGameEntityData(obj);
         allObjects.remove(obj);
     }
 
-    public float onObjectReceiveDamage(GameObject obj, int source, int sourceId, int DamagedByEntity, int damagedById, float damageToApply) {
-        damageEvent.applyValues(source, sourceId, DamagedByEntity, damagedById, damageToApply);
+    public float onObjectReceiveDamage(GameObject obj, int source, int sourceId, int damagedByEntity, int damagedById, float damageToApply) {
+        damageEvent.applyValues(source, sourceId, damagedByEntity, damagedById, damageToApply);
 
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                handler.onObjectReceiveDamage(obj, damageEvent);
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-        return damageToApply;
+        return onObjectReceiveDamage(obj, damageEvent);
     }
 
-    public void onObjectTouched(GameObject obj, int entityType, int gameEntityId) {
+    public Float onObjectReceiveDamage(GameObject obj, DamageEvent damageEvent) {
+        for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
+            try {
+                Float newValue = entry.getValue().onObjectReceiveDamage(obj, damageEvent);
+                if (newValue != null) {
+                    Events.emit(EventName.onObjectReceiveDamage, obj, damageEvent);
+                    return newValue;
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        }
+        Float newValue = Events.request(EventName.onObjectReceiveDamage, obj, damageEvent);
+        if (newValue != null) {
+            return newValue;
+        }
+
+        return damageEvent.getDamageToApply();
+    }
+
+    public void onObjectTouched(GameObject obj, int entityType, int entityId) {
+        GameEntity entity = server.getGameEntity(entityType, entityId);
+
         eventHandlers.forEach((name, handler) -> {
             try {
-                GameEntityType t = GameEntityType.value(entityType);
-
-                GameEntity ent = null;
-                if (null != t) {
-                    switch (t) {
-                        case NPC:
-                            ent = InternalServerEvents.server.getNPC(gameEntityId);
-                            break;
-                        case OBJECT:
-                            ent = InternalServerEvents.server.getObject(gameEntityId);
-                            break;
-                        case VEHICLE:
-                            ent = InternalServerEvents.server.getVehicle(gameEntityId);
-                            break;
-                        case PLAYER:
-                            ent = InternalServerEvents.server.getPlayer(gameEntityId);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                handler.onObjectTouched(obj, ent);
+                handler.onObjectTouched(obj, entity);
             } catch (Exception e) {
                 catchException(e);
             }
         });
-
+        Events.emit(EventName.onObjectTouched, obj, entity);
     }
 
     public void onObjectBroken(GameObject obj) {
@@ -713,5 +708,6 @@ public class InternalServerEvents {
                 catchException(e);
             }
         });
+        Events.emit(EventName.onObjectBroken, obj);
     }
 }

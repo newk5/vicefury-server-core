@@ -2,6 +2,9 @@ package com.github.newk5.vf.server.core;
 
 import com.github.newk5.vf.server.core.commands.CommandRegistry;
 import com.github.newk5.vf.server.core.entities.*;
+import com.github.newk5.vf.server.core.entities.gameobject.EntitySocket;
+import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
+import com.github.newk5.vf.server.core.entities.gameobject.ObjectSpawnProps;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.npc.NPCSpawnProps;
 import com.github.newk5.vf.server.core.entities.player.Player;
@@ -15,11 +18,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
-import static com.github.newk5.vf.server.core.InternalServerEvents.server;
-import com.github.newk5.vf.server.core.entities.gameobject.EntitySocket;
-import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
-import com.github.newk5.vf.server.core.entities.gameobject.ObjectSpawnProps;
 
 public class Server {
 
@@ -192,17 +190,22 @@ public class Server {
         return this.threadIsValid() ? this.nativeGetPlayer(id) : null;
     }
 
-    public GameEntity getGameEntity(GameEntityType type, int id) {
-        switch (type.value) {
-            case 1:
-                return server.getPlayer(id);
-            case 2:
-                return server.getVehicle(id);
-            case 3:
-                return server.getNPC(id);
-            default:
-                return null;
+    public GameEntity getGameEntity(int type, int id) {
+        GameEntityType t = GameEntityType.value(type);
+
+        if (t != null) {
+            switch (t) {
+                case PLAYER:
+                    return InternalServerEvents.server.getPlayer(id);
+                case VEHICLE:
+                    return InternalServerEvents.server.getVehicle(id);
+                case NPC:
+                    return InternalServerEvents.server.getNPC(id);
+                case OBJECT:
+                    return InternalServerEvents.server.getObject(id);
+            }
         }
+        return null;
     }
 
     private native void nativeSetSpawnScreenLocation(double X, double Y, double Z, double yawLookAt);
