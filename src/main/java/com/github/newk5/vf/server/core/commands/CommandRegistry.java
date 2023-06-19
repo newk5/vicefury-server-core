@@ -2,9 +2,10 @@ package com.github.newk5.vf.server.core.commands;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
 import com.github.newk5.vf.server.core.commands.annotations.Command;
-import com.github.newk5.vf.server.core.commands.annotations.CommandController;
+import com.github.newk5.vf.server.core.commands.annotations.CommandHandler;
 import com.github.newk5.vf.server.core.commands.resolvers.*;
-import com.github.newk5.vf.server.core.controllers.commands.ServerCommandController;
+import com.github.newk5.vf.server.core.controllers.CommandController;
+import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
@@ -20,11 +21,11 @@ import java.util.stream.Stream;
 
 public class CommandRegistry {
 
-    private List<ServerCommand> allCommands = new ArrayList<>();
+    private List<CommandEntry> allCommands = new ArrayList<>();
     private Map<String, Integer> cmdIndexCache = new HashMap<>();
     private Map<Class, BaseTypeResolver> typeResolvers = new HashMap<>();
     private Map<String, BaseTypeResolver> namedResolvers = new HashMap<>();
-    private Map<String, ServerCommandController> commandControllers = new HashMap<>();
+    private Map<String, CommandController> commandControllers = new HashMap<>();
     public boolean logExceptionsWhenCmdsAreUsedWithoutParams = false;
 
     int index = 0;
@@ -48,7 +49,8 @@ public class CommandRegistry {
                 .registerTypeResolver(String.class, new StringResolver())
                 .registerTypeResolver(NPC.class, new NPCResolver())
                 .registerTypeResolver(Player.class, new PlayerResolver())
-                .registerTypeResolver(Vehicle.class, new VehicleResolver());
+                .registerTypeResolver(Vehicle.class, new VehicleResolver())
+                .registerTypeResolver(GameObject.class, new GameObjectResolver());
     }
 
     public CommandRegistry registerTypeResolver(Class c, BaseTypeResolver r) {
@@ -82,8 +84,8 @@ public class CommandRegistry {
 
     public void registerController(Class controller) {
         try {
-            ServerCommandController c = (ServerCommandController) controller.getConstructors()[0].newInstance(InternalServerEvents.server);
-            CommandController cc = (CommandController) controller.getAnnotation(CommandController.class);
+            CommandController c = (CommandController) controller.getConstructors()[0].newInstance(InternalServerEvents.server);
+            CommandHandler cc = (CommandHandler) controller.getAnnotation(CommandHandler.class);
             if (!cc.name().equals("")) {
                 commandControllers.put(cc.name(), c);
             } else {
@@ -92,7 +94,7 @@ public class CommandRegistry {
 
             Stream.of(c.getClass().getDeclaredMethods()).filter(m -> m.isAnnotationPresent(Command.class)).forEach(m -> {
                 if (firstParamIsPlayer(m)) {
-                    ServerCommand cmd = registerMethod(c, cc, m);
+                    CommandEntry cmd = registerMethod(c, cc, m);
                     cmd.setIndex(index);
                     if (!cmdIndexCache.containsKey(cmd.getName())) {
                         cmdIndexCache.put(cmd.getName(), index);
@@ -127,10 +129,10 @@ public class CommandRegistry {
         return false;
     }
 
-    private ServerCommand registerMethod(ServerCommandController c, CommandController cc, Method m) {
+    private CommandEntry registerMethod(CommandController c, CommandHandler cc, Method m) {
         Command cmdAn = m.getAnnotation(Command.class);
         List<String> aliases = Stream.of(cmdAn.alias()).filter(s -> !s.trim().equals("")).map(String::toLowerCase).collect(Collectors.toList());
-        ServerCommand cmd = new ServerCommand(!cmdAn.name().equals("") ? cmdAn.name().toLowerCase() : m.getName().toLowerCase(), aliases, cc.requiresAuthentication() ? true : cmdAn.requiresAuthentication(), m.getParameterCount() - 1);
+        CommandEntry cmd = new CommandEntry(!cmdAn.name().equals("") ? cmdAn.name().toLowerCase() : m.getName().toLowerCase(), aliases, cc.requiresAuthentication() ? true : cmdAn.requiresAuthentication(), m.getParameterCount() - 1);
         cmd.setCommandAnn(cmdAn);
         cmd.setCommandController(c);
         cmd.setControllerAnn(cc);
@@ -158,7 +160,7 @@ public class CommandRegistry {
         String cmdName = input.split(" ")[0].toLowerCase();
         Integer index = cmdIndexCache.get(cmdName);
 
-        ServerCommand cmd = index != null ? allCommands.get(index) : null;
+        CommandEntry cmd = index != null ? allCommands.get(index) : null;
         if (cmd != null) {
             try {
                 if (cmd.getControllerAnn().requiresAuthentication()) {

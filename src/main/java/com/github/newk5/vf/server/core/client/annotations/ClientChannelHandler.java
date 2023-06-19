@@ -1,4 +1,4 @@
-package com.github.newk5.vf.server.core.events;
+package com.github.newk5.vf.server.core.client.annotations;
 
 import org.atteo.classindex.IndexAnnotated;
 
@@ -10,5 +10,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @IndexAnnotated
-public @interface ServerEventHandler {
+public @interface ClientChannelHandler {
+
+    String value() default "";
 }

@@ -1,9 +1,9 @@
-package com.github.newk5.vf.server.core.controllers.ai;
+package com.github.newk5.vf.server.core.controllers;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
 import com.github.newk5.vf.server.core.Server;
 import com.github.newk5.vf.server.core.entities.GameEntity;
-import com.github.newk5.vf.server.core.entities.NPCAction;
+import com.github.newk5.vf.server.core.entities.npc.NPCAction;
 import com.github.newk5.vf.server.core.entities.Vector;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.events.damage.DamageEvent;
@@ -18,40 +18,39 @@ public abstract class NPCController {
         this.server = InternalServerEvents.server;
     }
     
-    public void created() {
+    public void onCreated() {
         
     }
 
-    public void destroyed() {
+    public void onDestroy() {
 
     }
     
-    public void spawned() {
+    public void onSpawned() {
         
     }
 
-    public void onDeath(DamageEvent ev){
+    public void onDeath(DamageEvent damageEvent) {
 
     }
 
-    public Float receivedDamage(DamageEvent ev) {
-
+    public Float onReceiveDamage(DamageEvent damageEvent) {
         return null;
     }
 
-    public void actionChanged(NPCAction oldAction, NPCAction newAction) {
+    public void onActionChanged(NPCAction oldAction, NPCAction newAction) {
 
     }
 
-    public void gainedSightOf(GameEntity e) {
+    public void onGainedSightOf(GameEntity entity) {
 
     }
 
-    public void lostSightOf(GameEntity e) {
+    public void onLostSightOf(GameEntity entity) {
 
     }
 
-    public void heardNoise(Vector noiseLocation) {
+    public void onHeardNoise(Vector noiseLocation) {
 
     }
 }

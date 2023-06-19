@@ -10,8 +10,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @IndexAnnotated
-public @interface CommandController {
+public @interface CommandHandler {
 
-    public String name() default "";
-    public boolean requiresAuthentication() default false;
+    String name() default "";
+
+    boolean requiresAuthentication() default false;
 }

@@ -1,7 +1,7 @@
 package com.github.newk5.vf.server.core.entities.npc;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
-import com.github.newk5.vf.server.core.controllers.ai.NPCController;
+import com.github.newk5.vf.server.core.controllers.NPCController;
 import com.github.newk5.vf.server.core.entities.*;
 import com.github.newk5.vf.server.core.utils.Log;
 
@@ -31,6 +31,12 @@ public class NPC extends GameEntity {
             }
         }
         return this;
+    }
+
+    private native double nativeGetMoveDirection(int id);
+
+    public double getMoveDirection() {
+        return threadIsValid() ? this.nativeGetMoveDirection(this.id) : -1;
     }
 
     public NPCController getController() {

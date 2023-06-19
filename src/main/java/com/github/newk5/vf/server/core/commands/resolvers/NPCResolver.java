@@ -1,12 +1,14 @@
 package com.github.newk5.vf.server.core.commands.resolvers;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
+import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.exceptions.InvalidParameterTypeException;
 
 public class NPCResolver extends BaseTypeResolver {
 
     public NPCResolver() {
         super();
+        type = NPC.class;
     }
 
     @Override

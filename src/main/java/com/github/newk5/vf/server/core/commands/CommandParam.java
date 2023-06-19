@@ -9,14 +9,14 @@ import java.lang.reflect.Parameter;
 
 public class CommandParam {
 
-    private ServerCommand command;
+    private CommandEntry command;
     private CommandRegistry registry;
     private boolean optional;
     private boolean isLastParam;
     private Class type;
     private Parameter param;
 
-    public CommandParam(ServerCommand command, CommandRegistry registry, boolean optional, Class type, boolean isLastParam) {
+    public CommandParam(CommandEntry command, CommandRegistry registry, boolean optional, Class type, boolean isLastParam) {
         this.command = command;
         this.registry = registry;
         this.optional = optional;
@@ -64,11 +64,11 @@ public class CommandParam {
         return true;
     }
 
-    public ServerCommand getCommand() {
+    public CommandEntry getCommand() {
         return command;
     }
 
-    public void setCommand(ServerCommand command) {
+    public void setCommand(CommandEntry command) {
         this.command = command;
     }
 

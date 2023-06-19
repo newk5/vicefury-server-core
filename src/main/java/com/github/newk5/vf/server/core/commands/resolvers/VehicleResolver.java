@@ -1,12 +1,14 @@
 package com.github.newk5.vf.server.core.commands.resolvers;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
+import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
 import com.github.newk5.vf.server.core.exceptions.InvalidParameterTypeException;
 
 public class VehicleResolver extends BaseTypeResolver {
 
     public VehicleResolver() {
         super();
+        type = Vehicle.class;
     }
 
     @Override

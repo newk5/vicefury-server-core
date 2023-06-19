@@ -43,6 +43,12 @@ public class Vector {
         return new Vector(x + v.x, y - v.y, z - v.z);
     }
 
+    public void set(double x, double y, double z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
     public void setX(double x) {
         this.x = x;
     }

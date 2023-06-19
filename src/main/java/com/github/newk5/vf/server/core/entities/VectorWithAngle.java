@@ -17,6 +17,19 @@ public class VectorWithAngle {
     public VectorWithAngle() {
     }
 
+    public void set(double x, double y, double z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    public void set(double x, double y, double z, double yawAngle) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.yawAngle = yawAngle;
+    }
+
     public void setX(double x) {
         this.x = x;
     }

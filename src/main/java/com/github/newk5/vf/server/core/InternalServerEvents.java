@@ -1,15 +1,18 @@
 package com.github.newk5.vf.server.core;
 
-import com.github.newk5.vf.server.core.controllers.client.ClientChannelController;
+import com.github.newk5.vf.server.core.controllers.BaseEventController;
+import com.github.newk5.vf.server.core.controllers.NPCController;
+import com.github.newk5.vf.server.core.controllers.ClientChannelController;
 import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.GameEntityType;
-import com.github.newk5.vf.server.core.entities.NPCAction;
+import com.github.newk5.vf.server.core.entities.npc.NPCAction;
 import com.github.newk5.vf.server.core.entities.Vector;
 import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
-import com.github.newk5.vf.server.core.events.BaseServerEvents;
+import com.github.newk5.vf.server.core.events.EventName;
+import com.github.newk5.vf.server.core.events.Events;
 import com.github.newk5.vf.server.core.events.damage.DamageEvent;
 import com.github.newk5.vf.server.core.utils.Log;
 
@@ -17,10 +20,11 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class InternalServerEvents {
 
-    private Map<String, BaseServerEvents> eventHandlers = new HashMap<>();
+    private Map<String, BaseEventController> eventHandlers = new LinkedHashMap<>();
     public static Map<String, ClientChannelController> channelControllers = new HashMap<>();
     private static DamageEvent damageEvent = new DamageEvent();
     public static Server server;
@@ -48,8 +52,31 @@ public class InternalServerEvents {
         server = null;
     }
 
-    public void addEventHandler(String name, BaseServerEvents e) {
-        eventHandlers.put(name, e);
+    public void addEventHandler(String name, BaseEventController baseEvents) {
+        eventHandlers.put(name, baseEvents);
+    }
+
+    public void removeEventHandler(String name) {
+        if (eventHandlers.containsKey(name)) {
+            eventHandlers.remove(name);
+        }
+    }
+
+    public void sortEventHandlers() {
+
+        List<BaseEventController> sorted = eventHandlers.values()
+                .stream()
+                .sorted(Comparator.comparing(BaseEventController::getPosition))
+                .collect(Collectors.toList());
+        
+        Map<String, BaseEventController> temp = new LinkedHashMap<>();
+        
+        sorted.forEach(ev->{
+            temp.put(ev.getControllerName(), ev);
+        });
+        
+        eventHandlers = temp;
+        
     }
 
     private void catchException(Exception e) {
@@ -72,16 +99,18 @@ public class InternalServerEvents {
     }
 
     private void processTimers() {
-        if (!timers.isEmpty()) {
-            Iterator<GameTimer> it = timers.iterator();
-            while (it.hasNext()) {
-                GameTimer timer = it.next();
-                if (timer.shouldRun()) {
-                    timer.process();
-                }
-                if (timer.isPendingCancellation() || timer.stopConditionEvalsToTrue() || timer.hasExpired()) {
-                    it.remove();
-                }
+        if (timers.isEmpty()) {
+            return;
+        }
+
+        Iterator<GameTimer> it = timers.iterator();
+        while (it.hasNext()) {
+            GameTimer timer = it.next();
+            if (timer.shouldRun()) {
+                timer.process();
+            }
+            if (timer.isPendingCancellation() || timer.stopConditionEvalsToTrue() || timer.hasExpired()) {
+                it.remove();
             }
         }
     }
@@ -90,21 +119,22 @@ public class InternalServerEvents {
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onServerStart();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         });
+        Events.emit(EventName.onServerStart);
     }
 
     public void onServerShutdown() {
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onServerShutdown();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         });
-
+        Events.emit(EventName.onServerShutdown);
     }
 
     public void onTick() {
@@ -116,104 +146,123 @@ public class InternalServerEvents {
                     r.run();
                 }
             }
-            for (final Map.Entry<String, BaseServerEvents> e : eventHandlers.entrySet()) {
-                final BaseServerEvents handler = e.getValue();
-                handler.onTick();
-            }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             catchException(e);
         }
-    }
 
-    public void onPlayerJoin(final Player player) {
-
-        allPlayers.add(player);
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onPlayerJoin(player);
-            } catch (final Exception e) {
+                handler.onTick();
+            } catch (Exception e) {
                 catchException(e);
             }
         });
+        Events.emit(EventName.onTick);
     }
 
-    public void onPlayerLeave(final Player player) {
-        clearGameEntityData(player);
-        allPlayers.remove(player);
+    public void onPlayerJoin(Player player) {
+        allPlayers.add(player);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                handler.onPlayerJoin(player);
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onPlayerJoin, player);
+    }
+
+    public void onPlayerLeave(Player player) {
 
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onPlayerLeave(player);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         });
+        Events.emit(EventName.onPlayerLeave, player);
+        clearGameEntityData(player);
+        allPlayers.remove(player);
     }
 
     public boolean onPlayerRequestSpawn(Player player) {
-
-        for (final Map.Entry<String, BaseServerEvents> e : eventHandlers.entrySet()) {
+        for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             try {
-                Boolean v = e.getValue().onPlayerRequestSpawn(player);
-                if (v != null) {
-                    return v;
+                Boolean value = entry.getValue().onPlayerRequestSpawn(player);
+                if (value != null) {
+                    Events.emit(EventName.onPlayerRequestSpawn, player);
+                    return value;
                 }
-            } catch (final Exception ex) {
-                catchException(ex);
+            } catch (Exception e) {
+                catchException(e);
             }
         }
+        Boolean value = Events.request(EventName.onPlayerRequestSpawn, player);
+        if (value != null) {
+            return value;
+        }
+
         return true;
     }
 
-    public void onPlayerSpawnScreenSkinChange(Player player, int SkinId) {
+    public void onPlayerSpawnScreenSkinChange(Player player, int skinId) {
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onPlayerSpawnScreenSkinChange(player, SkinId);
-            } catch (final Exception e) {
+                handler.onPlayerSpawnScreenSkinChange(player, skinId);
+            } catch (Exception e) {
                 catchException(e);
             }
         });
+        Events.emit(EventName.onPlayerSpawnScreenSkinChange, player, skinId);
     }
 
     public void onPlayerSpawn(Player player) {
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onPlayerSpawn(player);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         });
+        Events.emit(EventName.onPlayerSpawn, player);
     }
 
-    public void onPlayerDied(Player player, int source, int sourceId, int DamagedByEntity, int damagedById, float damageToApply) {
-        damageEvent.applyValues(source, sourceId, DamagedByEntity, damagedById, damageToApply);
+    public void onPlayerDied(Player player, int source, int sourceId, int damagedByEntity, int damagedById, float damageToApply) {
+        damageEvent.applyValues(source, sourceId, damagedByEntity, damagedById, damageToApply);
 
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onPlayerDied(player, damageEvent);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         });
+        Events.emit(EventName.onPlayerDied, player, damageEvent);
     }
 
-    public boolean onPlayerMessage(final Player player, final String message) {
-        for (final Map.Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
-            final String name = entry.getKey();
-            final BaseServerEvents handler = entry.getValue();
+    public boolean onPlayerMessage(Player player, String message) {
+        for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             try {
-                Boolean canSendMessage = handler.onPlayerMessage(player, message);
-                if (canSendMessage != null) {
-                    return canSendMessage;
+                Boolean value = entry.getValue().onPlayerMessage(player, message);
+                if (value != null) {
+                    Events.emit(EventName.onPlayerMessage, player, message);
+                    return value;
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         }
+        Boolean value = Events.request(EventName.onPlayerMessage, player, message);
+        if (value != null) {
+            return value;
+        }
+
         return true;
     }
 
-    public void onPlayerCommand(final Player player, final String message) {
+    public void onPlayerCommand(Player player, String message) {
         try {
             server.commandRegistry.process(player, message);
         } catch (Exception ignored) {
@@ -222,305 +271,367 @@ public class InternalServerEvents {
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onPlayerCommand(player, message);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         });
+        Events.emit(EventName.onPlayerCommand, player, message);
     }
 
-    public void onDataReceived(final Player player, String channel, String data) {
+    public void onDataReceived(Player player, String channel, String data) {
         ClientChannelController c = channelControllers.get(channel);
-        if (c != null) {
-            c.receiveData(player, data);
-        } else {
-            for (final Map.Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
+
+        if (c == null) {
+            eventHandlers.forEach((name, handler) -> {
                 try {
-                    final BaseServerEvents handler = entry.getValue();
                     handler.onDataReceived(player, channel, data);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     catchException(e);
                 }
-            }
+            });
+            Events.emit(EventName.onDataReceived, player, channel, data);
+        } else {
+            c.receiveData(player, data);
         }
     }
 
-    public float onPlayerReceiveDamage(final Player player, int source, int sourceId, int DamagedByEntity, int damagedById, float damageToApply) {
-        damageEvent.applyValues(source, sourceId, DamagedByEntity, damagedById, damageToApply);
+    public float onPlayerReceiveDamage(Player player, int source, int sourceId, int damagedByEntity, int damagedById, float damageToApply) {
+        damageEvent.applyValues(source, sourceId, damagedByEntity, damagedById, damageToApply);
 
         return onPlayerReceiveDamage(player, damageEvent);
     }
 
-    public Float onPlayerReceiveDamage(final Player player, DamageEvent ev) {
-        for (Entry<String, BaseServerEvents> handler : eventHandlers.entrySet()) {
+    public Float onPlayerReceiveDamage(Player player, DamageEvent damageEvent) {
+        for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             try {
-                Float newValue = handler.getValue().onPlayerReceiveDamage(player, ev);
+                Float newValue = entry.getValue().onPlayerReceiveDamage(player, damageEvent);
                 if (newValue != null) {
+                    Events.emit(EventName.onPlayerReceiveDamage, player, damageEvent);
                     return newValue;
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         }
-        return ev.getDamageToApply();
-    }
-
-    public void onPlayerEnterVehicle(Player player, Vehicle v, boolean asDriver) {
-        for (Entry<String, BaseServerEvents> handler : eventHandlers.entrySet()) {
-            try {
-                handler.getValue().onPlayerEnterVehicle(player, v, asDriver);
-            } catch (final Exception e) {
-                catchException(e);
-            }
+        Float newValue = Events.request(EventName.onPlayerReceiveDamage, player, damageEvent);
+        if (newValue != null) {
+            return newValue;
         }
+
+        return damageEvent.getDamageToApply();
     }
 
-    public void onPlayerLeaveVehicle(Player player, Vehicle v, boolean asDriver) {
-        for (Entry<String, BaseServerEvents> handler : eventHandlers.entrySet()) {
-            try {
-                handler.getValue().onPlayerLeaveVehicle(player, v, asDriver);
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        }
-    }
-
-    public void onVehicleCreated(Vehicle v) {
-        allVehicles.add(v);
+    public void onPlayerEnterVehicle(Player player, Vehicle vehicle, boolean asDriver) {
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onVehicleCreated(v);
-            } catch (final Exception e) {
+                handler.onPlayerEnterVehicle(player, vehicle, asDriver);
+            } catch (Exception e) {
                 catchException(e);
             }
         });
+        Events.emit(EventName.onPlayerEnterVehicle, player, vehicle, asDriver);
     }
 
-    public void onVehicleDestroyed(Vehicle v) {
-        clearGameEntityData(v);
-        allVehicles.remove(v);
+    public void onPlayerLeaveVehicle(Player player, Vehicle vehicle, boolean asDriver) {
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onVehicleDestroyed(v);
-            } catch (final Exception e) {
+                handler.onPlayerLeaveVehicle(player, vehicle, asDriver);
+            } catch (Exception e) {
                 catchException(e);
             }
         });
+        Events.emit(EventName.onPlayerLeaveVehicle, player, vehicle, asDriver);
+    }
+
+    public void onVehicleCreated(Vehicle vehicle) {
+        allVehicles.add(vehicle);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                handler.onVehicleCreated(vehicle);
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onVehicleCreated, vehicle);
+    }
+
+    public void onVehicleDestroyed(Vehicle vehicle) {
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                handler.onVehicleDestroyed(vehicle);
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onVehicleDestroyed, vehicle);
+        clearGameEntityData(vehicle);
+        allVehicles.remove(vehicle);
     }
 
     public void onVehicleExploded(Vehicle vehicle) {
         eventHandlers.forEach((name, handler) -> {
             try {
                 handler.onVehicleExploded(vehicle);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         });
+        Events.emit(EventName.onVehicleExploded, vehicle);
     }
 
-    public float onVehicleReceiveDamage(final Vehicle v, int source, int sourceId, int DamagedByEntity, int damagedById, float damageToApply) {
-        damageEvent.applyValues(source, sourceId, DamagedByEntity, damagedById, damageToApply);
+    public float onVehicleReceiveDamage(Vehicle vehicle, int source, int sourceId, int damagedByEntity, int damagedById, float damageToApply) {
+        damageEvent.applyValues(source, sourceId, damagedByEntity, damagedById, damageToApply);
 
-        return onVehicleReceiveDamage(v, damageEvent);
+        return onVehicleReceiveDamage(vehicle, damageEvent);
     }
 
-    public Float onVehicleReceiveDamage(final Vehicle v, DamageEvent ev) {
-        for (Entry<String, BaseServerEvents> handler : eventHandlers.entrySet()) {
+    public Float onVehicleReceiveDamage(Vehicle vehicle, DamageEvent damageEvent) {
+        for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             try {
-                Float newValue = handler.getValue().onVehicleReceiveDamage(v, ev);
+                Float newValue = entry.getValue().onVehicleReceiveDamage(vehicle, damageEvent);
                 if (newValue != null) {
+                    Events.emit(EventName.onVehicleReceiveDamage, vehicle, damageEvent);
                     return newValue;
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         }
-        return ev.getDamageToApply();
+        Float newValue = Events.request(EventName.onVehicleReceiveDamage, vehicle, damageEvent);
+        if (newValue != null) {
+            return newValue;
+        }
+
+        return damageEvent.getDamageToApply();
     }
 
-    public void onNPCCreated(final NPC npc) {
+    public void onNPCCreated(NPC npc) {
         allNpcs.add(npc);
-        try {
-            for (final Map.Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
-                final String name = entry.getKey();
-                final BaseServerEvents handler = entry.getValue();
-                if (npc.getController() != null) {
-                    npc.getController().created();
-                } else {
+
+        NPCController c = npc.getController();
+        if (c == null) {
+            eventHandlers.forEach((name, handler) -> {
+                try {
                     handler.onNpcCreated(npc);
+                } catch (Exception e) {
+                    catchException(e);
                 }
-            }
-        } catch (final Exception e) {
-            catchException(e);
+            });
+            Events.emit(EventName.onNpcCreated, npc);
+        } else {
+            c.onCreated();
         }
     }
 
-    public void onNPCDestroyed(final NPC npc) {
+    public void onNPCDestroyed(NPC npc) {
+
+        NPCController c = npc.getController();
+        if (c == null) {
+            eventHandlers.forEach((name, handler) -> {
+                try {
+                    handler.onNpcDestroy(npc);
+                } catch (Exception e) {
+                    catchException(e);
+                }
+            });
+            Events.emit(EventName.onNpcDestroy, npc);
+        } else {
+            c.onDestroy();
+        }
         clearGameEntityData(npc);
         allNpcs.remove(npc);
-        try {
-            for (final Map.Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
-                final String name = entry.getKey();
-                final BaseServerEvents handler = entry.getValue();
-                if (npc.getController() != null) {
-                    npc.getController().destroyed();
-                } else {
-                    handler.onNpcDestroy(npc);
-                }
-            }
-        } catch (final Exception e) {
-            catchException(e);
-        }
     }
 
-    public void onNPCSpawned(final NPC npc) {
-        try {
-            for (final Map.Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
-                final String name = entry.getKey();
-                final BaseServerEvents handler = entry.getValue();
-                if (npc.getController() != null) {
-                    npc.getController().spawned();
-                } else {
+    public void onNPCSpawned(NPC npc) {
+        NPCController c = npc.getController();
+
+        if (c == null) {
+            eventHandlers.forEach((name, handler) -> {
+                try {
                     handler.onNpcSpawned(npc);
+                } catch (Exception e) {
+                    catchException(e);
                 }
-            }
-        } catch (final Exception e) {
-            catchException(e);
+            });
+            Events.emit(EventName.onNpcSpawned, npc);
+        } else {
+            c.onSpawned();
         }
     }
 
-    public void onNPCDied(final NPC npc, int source, int sourceId, int DamagedByEntity, int damagedById, float damageToApply) {
-        damageEvent.applyValues(source, sourceId, DamagedByEntity, damagedById, damageToApply);
+    public void onNPCDied(NPC npc, int source, int sourceId, int damagedByEntity, int damagedById, float damageToApply) {
+        damageEvent.applyValues(source, sourceId, damagedByEntity, damagedById, damageToApply);
 
         onNpcDied(npc, damageEvent);
     }
 
-    public void onNpcDied(final NPC npc, DamageEvent ev) {
-        for (Entry<String, BaseServerEvents> handler : eventHandlers.entrySet()) {
-            try {
-                if (npc.getController() != null) {
-                    npc.getController().onDeath(ev);
+    public void onNpcDied(NPC npc, DamageEvent damageEvent) {
+        NPCController c = npc.getController();
+
+        if (c == null) {
+            eventHandlers.forEach((name, handler) -> {
+                try {
+                    handler.onNpcDied(npc, damageEvent);
+                } catch (Exception e) {
+                    catchException(e);
                 }
-                handler.getValue().onNpcDied(npc, ev);
-            } catch (final Exception e) {
-                catchException(e);
-            }
+            });
+            Events.emit(EventName.onNpcDied, npc, damageEvent);
+        } else {
+            c.onDeath(damageEvent);
         }
     }
 
-    public float onNPCReceiveDamage(final NPC npc, int source, int sourceId, int DamagedByEntity, int damagedById, float damageToApply) {
-        damageEvent.applyValues(source, sourceId, DamagedByEntity, damagedById, damageToApply);
+    public float onNPCReceiveDamage(NPC npc, int source, int sourceId, int damagedByEntity, int damagedById, float damageToApply) {
+        damageEvent.applyValues(source, sourceId, damagedByEntity, damagedById, damageToApply);
 
         return onNpcReceiveDamage(npc, damageEvent);
     }
 
-    public Float onNpcReceiveDamage(final NPC npc, DamageEvent ev) {
-        for (Entry<String, BaseServerEvents> handler : eventHandlers.entrySet()) {
-            try {
-                Float newValue = npc.getController() != null ? npc.getController().receivedDamage(ev) : handler.getValue().onNpcReceiveDamage(npc, ev);
-                if (newValue != null) {
-                    return newValue;
+    public Float onNpcReceiveDamage(NPC npc, DamageEvent damageEvent) {
+        NPCController c = npc.getController();
+
+        if (c == null) {
+            for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
+                try {
+                    Float newValue = entry.getValue().onNpcReceiveDamage(npc, damageEvent);
+                    if (newValue != null) {
+                        Events.emit(EventName.onNpcReceiveDamage, npc, damageEvent);
+                        return newValue;
+                    }
+                } catch (Exception e) {
+                    catchException(e);
                 }
-            } catch (final Exception e) {
-                catchException(e);
+            }
+            Float newValue = Events.request(EventName.onNpcReceiveDamage, npc, damageEvent);
+            if (newValue != null) {
+                return newValue;
+            }
+        } else {
+            Float newValue = c.onReceiveDamage(damageEvent);
+            if (newValue != null) {
+                return newValue;
             }
         }
-        return ev.getDamageToApply();
+        return damageEvent.getDamageToApply();
     }
 
-    public void onNPCActionChanged(final NPC npc, int oldAct, int newAct) {
-        for (final Map.Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
-            final String name = entry.getKey();
-            final BaseServerEvents handler = entry.getValue();
-            try {
-                if (npc.getController() != null) {
-                    npc.getController().actionChanged(NPCAction.value(oldAct), NPCAction.value(newAct));
+    public void onNPCActionChanged(NPC npc, int oldAction, int newAction) {
+        onNpcActionChanged(npc, NPCAction.value(oldAction), NPCAction.value(newAction));
+    }
 
-                } else {
-                    handler.onNpcActionChanged(npc, NPCAction.value(oldAct), NPCAction.value(newAct));
+    public void onNpcActionChanged(NPC npc, NPCAction oldAction, NPCAction newAction) {
+        NPCController c = npc.getController();
+
+        if (c == null) {
+            eventHandlers.forEach((name, handler) -> {
+                try {
+                    handler.onNpcActionChanged(npc, oldAction, newAction);
+                } catch (Exception e) {
+                    catchException(e);
                 }
-            } catch (final Exception e) {
-                catchException(e);
-            }
+            });
+            Events.emit(EventName.onNpcActionChanged, npc, oldAction, newAction);
+        } else {
+            c.onActionChanged(oldAction, newAction);
         }
     }
 
-    public boolean onNPCGainedSightOf(final NPC npc, int entityType, int entityId) {
-        GameEntity ent = server.getGameEntity(GameEntityType.value(entityType), entityId);
+    public boolean onNPCGainedSightOf(NPC npc, int entityType, int entityId) {
+        GameEntity entity = server.getGameEntity(GameEntityType.value(entityType), entityId);
 
-        if (ent != null) {
-            return onNPCGainedSightOf(npc, ent);
+        if (entity != null) {
+            return onNpcGainedSightOf(npc, entity);
         }
         return true;
     }
 
-    public Boolean onNPCGainedSightOf(final NPC npc, GameEntity ent) {
-        for (final Map.Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
-            final String name = entry.getKey();
-            final BaseServerEvents handler = entry.getValue();
-            try {
-                if (npc.getController() != null) {
-                    npc.getController().gainedSightOf(ent);
-                    return false;
+    public Boolean onNpcGainedSightOf(NPC npc, GameEntity entity) {
+        NPCController c = npc.getController();
+
+        if (c == null) {
+            for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
+                try {
+                    Boolean value = entry.getValue().onNpcGainedSightOf(npc, entity);
+                    if (value != null) {
+                        Events.emit(EventName.onNpcGainedSightOf, npc, entity);
+                        return value;
+                    }
+                } catch (Exception e) {
+                    catchException(e);
                 }
-                Boolean ack = handler.onNpcGainedSightOf(npc, ent);
-                if (ack != null) {
-                    return ack;
-                }
-            } catch (final Exception e) {
-                catchException(e);
             }
+            Boolean value = Events.request(EventName.onNpcGainedSightOf, npc, entity);
+            if (value != null) {
+                return value;
+            }
+        } else {
+            c.onGainedSightOf(entity);
+            return false;
         }
         return true;
     }
 
-    public boolean onNPCLostSightOf(final NPC npc, int entityType, int entityId) {
-        GameEntity ent = server.getGameEntity(GameEntityType.value(entityType), entityId);
-        if (ent != null) {
-            return onNPCLostSightOf(npc, ent);
+    public boolean onNPCLostSightOf(NPC npc, int entityType, int entityId) {
+        GameEntity entity = server.getGameEntity(GameEntityType.value(entityType), entityId);
+
+        if (entity != null) {
+            return onNpcLostSightOf(npc, entity);
         }
         return true;
     }
 
-    public Boolean onNPCLostSightOf(final NPC npc, GameEntity ent) {
-        for (final Map.Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
-            final String name = entry.getKey();
-            final BaseServerEvents handler = entry.getValue();
-            try {
-                if (npc.getController() != null) {
-                    npc.getController().lostSightOf(ent);
-                    return false;
+    public Boolean onNpcLostSightOf(NPC npc, GameEntity entity) {
+        NPCController c = npc.getController();
+
+        if (c == null) {
+            for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
+                try {
+                    Boolean value = entry.getValue().onNpcLostSightOf(npc, entity);
+                    if (value != null) {
+                        Events.emit(EventName.onNpcLostSightOf, npc, entity);
+                        return value;
+                    }
+                } catch (Exception e) {
+                    catchException(e);
                 }
-                Boolean ack = handler.onNpcLostSightOf(npc, ent);
-                if (ack != null) {
-                    return ack;
-                }
-            } catch (final Exception e) {
-                catchException(e);
             }
+            Boolean value = Events.request(EventName.onNpcLostSightOf, npc, entity);
+            if (value != null) {
+                return value;
+            }
+        } else {
+            c.onLostSightOf(entity);
+            return false;
         }
         return true;
     }
 
-    public boolean onNPCHeardNoise(final NPC npc, double x, double y, double z) {
-        cachedNPCNoiseVector.setX(x);
-        cachedNPCNoiseVector.setY(y);
-        cachedNPCNoiseVector.setZ(z);
+    public boolean onNPCHeardNoise(NPC npc, double x, double y, double z) {
+        cachedNPCNoiseVector.set(x, y, z);
 
-        for (final Map.Entry<String, BaseServerEvents> entry : eventHandlers.entrySet()) {
-            final String name = entry.getKey();
-            final BaseServerEvents handler = entry.getValue();
-            try {
-                if (npc.getController() != null) {
-                    npc.getController().heardNoise(cachedNPCNoiseVector);
-                    return false;
+        NPCController c = npc.getController();
+        if (c == null) {
+            for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
+                try {
+                    Boolean value = entry.getValue().onNpcHeardNoise(npc, cachedNPCNoiseVector);
+                    if (value != null) {
+                        Events.emit(EventName.onNpcHeardNoise, npc, cachedNPCNoiseVector);
+                        return value;
+                    }
+                } catch (Exception e) {
+                    catchException(e);
                 }
-                Boolean ack = handler.onNpcHeardNoise(npc, cachedNPCNoiseVector);
-                if (ack != null) {
-                    return ack;
-                }
-            } catch (final Exception e) {
-                catchException(e);
             }
+            Boolean value = Events.request(EventName.onNpcHeardNoise, npc, cachedNPCNoiseVector);
+            if (value != null) {
+                return value;
+            }
+        } else {
+            c.onHeardNoise(cachedNPCNoiseVector);
+            return false;
         }
         return true;
     }

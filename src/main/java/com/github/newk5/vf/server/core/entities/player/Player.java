@@ -25,6 +25,12 @@ public class Player extends GameEntity {
         this.authenticated = authenticated;
     }
 
+    private native double nativeGetMoveDirection(int id);
+
+    public double getMoveDirection() {
+        return threadIsValid() ? this.nativeGetMoveDirection(this.id) : -1;
+    }
+
     private native String nativeGetBoneNames(int id);
 
     public String getBoneNames() {

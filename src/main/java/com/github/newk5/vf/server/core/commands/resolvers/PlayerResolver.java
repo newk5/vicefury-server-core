@@ -1,12 +1,14 @@
 package com.github.newk5.vf.server.core.commands.resolvers;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
+import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.exceptions.InvalidParameterTypeException;
 
 public class PlayerResolver extends BaseTypeResolver {
 
     public PlayerResolver() {
         super();
+        type = Player.class;
     }
 
     @Override
