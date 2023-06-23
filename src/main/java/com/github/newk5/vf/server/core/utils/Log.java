@@ -55,7 +55,7 @@ public class Log {
     public static void exception(Exception e, Object message, Object... args) {
         StackTraceElement[] stackTrace = e.getStackTrace();
 
-        error("Cause: " + e.toString());
+        error("Cause: %s", e.toString());
         error("An unexpected error has occurred: %s", format(message, args));
         for (StackTraceElement element : stackTrace) {
             error("\t\tat %s", element);
@@ -63,7 +63,12 @@ public class Log {
     }
 
     public static void exception(Exception e) {
-        exception(e, e.getMessage());
+        StackTraceElement[] stackTrace = e.getStackTrace();
+
+        error("An unexpected error has occurred: %s", e.toString());
+        for (StackTraceElement element : stackTrace) {
+            error("\t\tat %s", element);
+        }
     }
 
     public static void info(Object message, Object... args) {
