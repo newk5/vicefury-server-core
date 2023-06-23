@@ -18,6 +18,7 @@ public abstract class BaseEventController {
     public Server server;
     private int position;
     private String controllerName;
+    protected boolean disabled;
 
     public BaseEventController() {
 
@@ -171,5 +172,19 @@ public abstract class BaseEventController {
 
     public void onObjectBroken(GameObject obj) {
 
+    }
+
+    /**
+     * @return the disabled
+     */
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    /**
+     * @param disabled the disabled to set
+     */
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
     }
 }

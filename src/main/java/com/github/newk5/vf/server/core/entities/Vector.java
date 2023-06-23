@@ -15,8 +15,16 @@ public class Vector {
     public Vector() {
     }
 
+    public Vector createCopy() {
+        return new Vector(x, y, z);
+    }
+
     public VectorWithAngle createVectorWithAngle(double angle) {
         return new VectorWithAngle(x, y, z, angle);
+    }
+
+    public Double distanceTo(Vector v2) {
+        return Math.sqrt((v2.x - x) * (v2.x - x) + (v2.y - y) * (v2.y - y) + (v2.z - z) * (v2.z - z));
     }
 
     public Vector multiply(double v) {

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 public class InternalServerEvents {
 
-    private Map<String, BaseEventController> eventHandlers = new LinkedHashMap<>();
+    protected Map<String, BaseEventController> eventHandlers = new LinkedHashMap<>();
     public static Map<String, ClientChannelController> channelControllers = new HashMap<>();
     private static DamageEvent damageEvent = new DamageEvent();
     public static Server server;
@@ -36,11 +36,19 @@ public class InternalServerEvents {
     protected static List<GameTimer> timers = new ArrayList<>();
     public static Consumer<Exception> onException;
     private Vector cachedNPCNoiseVector = new Vector();
+    private static List<Integer> playersWhoLeftTheServer = new ArrayList<>();
+    private static List<Integer> vehiclesDestroyed = new ArrayList<>();
+    private static List<Integer> objectsDestroyed = new ArrayList<>();
+    private static List<Integer> npcsDestroyed = new ArrayList<>();
 
     public InternalServerEvents() {
     }
 
     protected void clearData() {
+        playersWhoLeftTheServer.clear();
+        vehiclesDestroyed.clear();
+        objectsDestroyed.clear();
+        npcsDestroyed.clear();
         eventHandlers.clear();
         channelControllers.clear();
         allPlayers.clear();
@@ -50,6 +58,20 @@ public class InternalServerEvents {
         timers.clear();
         onException = null;
         server = null;
+    }
+
+    public static boolean isValid(GameEntity e) {
+        if (e instanceof Player) {
+            return !playersWhoLeftTheServer.contains((Integer) e.getId());
+        } else if (e instanceof Vehicle) {
+            return !vehiclesDestroyed.contains((Integer) e.getId());
+        } else if (e instanceof NPC) {
+            return !npcsDestroyed.contains((Integer) e.getId());
+        } else if (e instanceof GameObject) {
+            return !objectsDestroyed.contains((Integer) e.getId());
+        }
+
+        return true;
     }
 
     public void addEventHandler(String name, BaseEventController baseEvents) {
@@ -62,16 +84,20 @@ public class InternalServerEvents {
         }
     }
 
+    public BaseEventController getEventHandler(String name) {
+        return eventHandlers.get(name);
+    }
+
     public void sortEventHandlers() {
 
         List<BaseEventController> sorted = eventHandlers.values()
                 .stream()
                 .sorted(Comparator.comparing(BaseEventController::getPosition))
                 .collect(Collectors.toList());
-        
+
         Map<String, BaseEventController> temp = new LinkedHashMap<>();
-        
-        sorted.forEach(ev->{
+
+        sorted.forEach(ev -> {
             temp.put(ev.getControllerName(), ev);
         });
         eventHandlers = temp;
@@ -113,28 +139,6 @@ public class InternalServerEvents {
         }
     }
 
-    public void onServerStart() {
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                handler.onServerStart();
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        Events.emit(EventName.onServerStart);
-    }
-
-    public void onServerShutdown() {
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                handler.onServerShutdown();
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        Events.emit(EventName.onServerShutdown);
-    }
-
     public void onTick() {
         try {
             processTimers();
@@ -158,12 +162,46 @@ public class InternalServerEvents {
         Events.emit(EventName.onTick);
     }
 
+    public void onServerStart() {
+        playersWhoLeftTheServer.clear();
+        vehiclesDestroyed.clear();
+        objectsDestroyed.clear();
+        npcsDestroyed.clear();
+        
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onServerStart();
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onServerStart);
+    }
+
+    public void onServerShutdown() {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onServerShutdown();
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onServerShutdown);
+    }
+
     public void onPlayerJoin(Player player) {
+        playersWhoLeftTheServer.remove((Integer) player.getId());
         allPlayers.add(player);
 
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onPlayerJoin(player);
+                if (!handler.isDisabled()) {
+                    handler.onPlayerJoin(player);
+                }
             } catch (Exception e) {
                 catchException(e);
             }
@@ -175,7 +213,9 @@ public class InternalServerEvents {
 
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onPlayerLeave(player);
+                if (!handler.isDisabled()) {
+                    handler.onPlayerLeave(player);
+                }
             } catch (Exception e) {
                 catchException(e);
             }
@@ -183,18 +223,21 @@ public class InternalServerEvents {
         Events.emit(EventName.onPlayerLeave, player);
         clearGameEntityData(player);
         allPlayers.remove(player);
+        playersWhoLeftTheServer.add(player.getId());
     }
 
     public boolean onPlayerRequestSpawn(Player player) {
         for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
-            try {
-                Boolean value = entry.getValue().onPlayerRequestSpawn(player);
-                if (value != null) {
-                    Events.emit(EventName.onPlayerRequestSpawn, player);
-                    return value;
+            if (!entry.getValue().isDisabled()) {
+                try {
+                    Boolean value = entry.getValue().onPlayerRequestSpawn(player);
+                    if (value != null) {
+                        Events.emit(EventName.onPlayerRequestSpawn, player);
+                        return value;
+                    }
+                } catch (Exception e) {
+                    catchException(e);
                 }
-            } catch (Exception e) {
-                catchException(e);
             }
         }
         Boolean value = Events.request(EventName.onPlayerRequestSpawn, player);
@@ -208,7 +251,9 @@ public class InternalServerEvents {
     public void onPlayerSpawnScreenSkinChange(Player player, int skinId) {
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onPlayerSpawnScreenSkinChange(player, skinId);
+                if (!handler.isDisabled()) {
+                    handler.onPlayerSpawnScreenSkinChange(player, skinId);
+                }
             } catch (Exception e) {
                 catchException(e);
             }
@@ -219,7 +264,9 @@ public class InternalServerEvents {
     public void onPlayerSpawn(Player player) {
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onPlayerSpawn(player);
+                if (!handler.isDisabled()) {
+                    handler.onPlayerSpawn(player);
+                }
             } catch (Exception e) {
                 catchException(e);
             }
@@ -232,7 +279,9 @@ public class InternalServerEvents {
 
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onPlayerDied(player, damageEvent);
+                if (!handler.isDisabled()) {
+                    handler.onPlayerDied(player, damageEvent);
+                }
             } catch (Exception e) {
                 catchException(e);
             }
@@ -242,14 +291,16 @@ public class InternalServerEvents {
 
     public boolean onPlayerMessage(Player player, String message) {
         for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
-            try {
-                Boolean value = entry.getValue().onPlayerMessage(player, message);
-                if (value != null) {
-                    Events.emit(EventName.onPlayerMessage, player, message);
-                    return value;
+            if (!entry.getValue().isDisabled()) {
+                try {
+                    Boolean value = entry.getValue().onPlayerMessage(player, message);
+                    if (value != null) {
+                        Events.emit(EventName.onPlayerMessage, player, message);
+                        return value;
+                    }
+                } catch (Exception e) {
+                    catchException(e);
                 }
-            } catch (Exception e) {
-                catchException(e);
             }
         }
         Boolean value = Events.request(EventName.onPlayerMessage, player, message);
@@ -268,7 +319,9 @@ public class InternalServerEvents {
 
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onPlayerCommand(player, message);
+                if (!handler.isDisabled()) {
+                    handler.onPlayerCommand(player, message);
+                }
             } catch (Exception e) {
                 catchException(e);
             }
@@ -282,7 +335,9 @@ public class InternalServerEvents {
         if (c == null) {
             eventHandlers.forEach((name, handler) -> {
                 try {
-                    handler.onDataReceived(player, channel, data);
+                    if (!handler.isDisabled()) {
+                        handler.onDataReceived(player, channel, data);
+                    }
                 } catch (Exception e) {
                     catchException(e);
                 }
@@ -301,14 +356,16 @@ public class InternalServerEvents {
 
     public Float onPlayerReceiveDamage(Player player, DamageEvent damageEvent) {
         for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
-            try {
-                Float newValue = entry.getValue().onPlayerReceiveDamage(player, damageEvent);
-                if (newValue != null) {
-                    Events.emit(EventName.onPlayerReceiveDamage, player, damageEvent);
-                    return newValue;
+            if (!entry.getValue().isDisabled()) {
+                try {
+                    Float newValue = entry.getValue().onPlayerReceiveDamage(player, damageEvent);
+                    if (newValue != null) {
+                        Events.emit(EventName.onPlayerReceiveDamage, player, damageEvent);
+                        return newValue;
+                    }
+                } catch (Exception e) {
+                    catchException(e);
                 }
-            } catch (Exception e) {
-                catchException(e);
             }
         }
         Float newValue = Events.request(EventName.onPlayerReceiveDamage, player, damageEvent);
@@ -322,7 +379,9 @@ public class InternalServerEvents {
     public void onPlayerEnterVehicle(Player player, Vehicle vehicle, boolean asDriver) {
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onPlayerEnterVehicle(player, vehicle, asDriver);
+                if (!handler.isDisabled()) {
+                    handler.onPlayerEnterVehicle(player, vehicle, asDriver);
+                }
             } catch (Exception e) {
                 catchException(e);
             }
@@ -333,7 +392,9 @@ public class InternalServerEvents {
     public void onPlayerLeaveVehicle(Player player, Vehicle vehicle, boolean asDriver) {
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onPlayerLeaveVehicle(player, vehicle, asDriver);
+                if (!handler.isDisabled()) {
+                    handler.onPlayerLeaveVehicle(player, vehicle, asDriver);
+                }
             } catch (Exception e) {
                 catchException(e);
             }
@@ -342,11 +403,14 @@ public class InternalServerEvents {
     }
 
     public void onVehicleCreated(Vehicle vehicle) {
+        vehiclesDestroyed.remove((Integer) vehicle.getId());
         allVehicles.add(vehicle);
 
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onVehicleCreated(vehicle);
+                if (!handler.isDisabled()) {
+                    handler.onVehicleCreated(vehicle);
+                }
             } catch (Exception e) {
                 catchException(e);
             }
@@ -357,7 +421,9 @@ public class InternalServerEvents {
     public void onVehicleDestroyed(Vehicle vehicle) {
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onVehicleDestroyed(vehicle);
+                if (!handler.isDisabled()) {
+                    handler.onVehicleDestroyed(vehicle);
+                }
             } catch (Exception e) {
                 catchException(e);
             }
@@ -366,12 +432,15 @@ public class InternalServerEvents {
 
         clearGameEntityData(vehicle);
         allVehicles.remove(vehicle);
+        vehiclesDestroyed.add(vehicle.getId());
     }
 
     public void onVehicleExploded(Vehicle vehicle) {
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onVehicleExploded(vehicle);
+                if (!handler.isDisabled()) {
+                    handler.onVehicleExploded(vehicle);
+                }
             } catch (Exception e) {
                 catchException(e);
             }
@@ -387,14 +456,16 @@ public class InternalServerEvents {
 
     public Float onVehicleReceiveDamage(Vehicle vehicle, DamageEvent damageEvent) {
         for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
-            try {
-                Float newValue = entry.getValue().onVehicleReceiveDamage(vehicle, damageEvent);
-                if (newValue != null) {
-                    Events.emit(EventName.onVehicleReceiveDamage, vehicle, damageEvent);
-                    return newValue;
+            if (!entry.getValue().isDisabled()) {
+                try {
+                    Float newValue = entry.getValue().onVehicleReceiveDamage(vehicle, damageEvent);
+                    if (newValue != null) {
+                        Events.emit(EventName.onVehicleReceiveDamage, vehicle, damageEvent);
+                        return newValue;
+                    }
+                } catch (Exception e) {
+                    catchException(e);
                 }
-            } catch (Exception e) {
-                catchException(e);
             }
         }
         Float newValue = Events.request(EventName.onVehicleReceiveDamage, vehicle, damageEvent);
@@ -406,13 +477,16 @@ public class InternalServerEvents {
     }
 
     public void onNPCCreated(NPC npc) {
+        npcsDestroyed.remove((Integer) npc.getId());
         allNpcs.add(npc);
 
         NPCController c = npc.getController();
         if (c == null) {
             eventHandlers.forEach((name, handler) -> {
                 try {
-                    handler.onNpcCreated(npc);
+                    if (!handler.isDisabled()) {
+                        handler.onNpcCreated(npc);
+                    }
                 } catch (Exception e) {
                     catchException(e);
                 }
@@ -429,7 +503,9 @@ public class InternalServerEvents {
         if (c == null) {
             eventHandlers.forEach((name, handler) -> {
                 try {
-                    handler.onNpcDestroy(npc);
+                    if (!handler.isDisabled()) {
+                        handler.onNpcDestroy(npc);
+                    }
                 } catch (Exception e) {
                     catchException(e);
                 }
@@ -440,6 +516,7 @@ public class InternalServerEvents {
         }
         clearGameEntityData(npc);
         allNpcs.remove(npc);
+        npcsDestroyed.add(npc.getId());
     }
 
     public void onNPCSpawned(NPC npc) {
@@ -448,7 +525,9 @@ public class InternalServerEvents {
         if (c == null) {
             eventHandlers.forEach((name, handler) -> {
                 try {
-                    handler.onNpcSpawned(npc);
+                    if (!handler.isDisabled()) {
+                        handler.onNpcSpawned(npc);
+                    }
                 } catch (Exception e) {
                     catchException(e);
                 }
@@ -471,7 +550,9 @@ public class InternalServerEvents {
         if (c == null) {
             eventHandlers.forEach((name, handler) -> {
                 try {
-                    handler.onNpcDied(npc, damageEvent);
+                    if (!handler.isDisabled()) {
+                        handler.onNpcDied(npc, damageEvent);
+                    }
                 } catch (Exception e) {
                     catchException(e);
                 }
@@ -493,14 +574,16 @@ public class InternalServerEvents {
 
         if (c == null) {
             for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
-                try {
-                    Float newValue = entry.getValue().onNpcReceiveDamage(npc, damageEvent);
-                    if (newValue != null) {
-                        Events.emit(EventName.onNpcReceiveDamage, npc, damageEvent);
-                        return newValue;
+                if (!entry.getValue().isDisabled()) {
+                    try {
+                        Float newValue = entry.getValue().onNpcReceiveDamage(npc, damageEvent);
+                        if (newValue != null) {
+                            Events.emit(EventName.onNpcReceiveDamage, npc, damageEvent);
+                            return newValue;
+                        }
+                    } catch (Exception e) {
+                        catchException(e);
                     }
-                } catch (Exception e) {
-                    catchException(e);
                 }
             }
             Float newValue = Events.request(EventName.onNpcReceiveDamage, npc, damageEvent);
@@ -526,7 +609,9 @@ public class InternalServerEvents {
         if (c == null) {
             eventHandlers.forEach((name, handler) -> {
                 try {
-                    handler.onNpcActionChanged(npc, oldAction, newAction);
+                    if (!handler.isDisabled()) {
+                        handler.onNpcActionChanged(npc, oldAction, newAction);
+                    }
                 } catch (Exception e) {
                     catchException(e);
                 }
@@ -551,14 +636,16 @@ public class InternalServerEvents {
 
         if (c == null) {
             for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
-                try {
-                    Boolean value = entry.getValue().onNpcGainedSightOf(npc, entity);
-                    if (value != null) {
-                        Events.emit(EventName.onNpcGainedSightOf, npc, entity);
-                        return value;
+                if (!entry.getValue().isDisabled()) {
+                    try {
+                        Boolean value = entry.getValue().onNpcGainedSightOf(npc, entity);
+                        if (value != null) {
+                            Events.emit(EventName.onNpcGainedSightOf, npc, entity);
+                            return value;
+                        }
+                    } catch (Exception e) {
+                        catchException(e);
                     }
-                } catch (Exception e) {
-                    catchException(e);
                 }
             }
             Boolean value = Events.request(EventName.onNpcGainedSightOf, npc, entity);
@@ -586,14 +673,16 @@ public class InternalServerEvents {
 
         if (c == null) {
             for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
-                try {
-                    Boolean value = entry.getValue().onNpcLostSightOf(npc, entity);
-                    if (value != null) {
-                        Events.emit(EventName.onNpcLostSightOf, npc, entity);
-                        return value;
+                if (!entry.getValue().isDisabled()) {
+                    try {
+                        Boolean value = entry.getValue().onNpcLostSightOf(npc, entity);
+                        if (value != null) {
+                            Events.emit(EventName.onNpcLostSightOf, npc, entity);
+                            return value;
+                        }
+                    } catch (Exception e) {
+                        catchException(e);
                     }
-                } catch (Exception e) {
-                    catchException(e);
                 }
             }
             Boolean value = Events.request(EventName.onNpcLostSightOf, npc, entity);
@@ -613,14 +702,16 @@ public class InternalServerEvents {
         NPCController c = npc.getController();
         if (c == null) {
             for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
-                try {
-                    Boolean value = entry.getValue().onNpcHeardNoise(npc, cachedNPCNoiseVector);
-                    if (value != null) {
-                        Events.emit(EventName.onNpcHeardNoise, npc, cachedNPCNoiseVector);
-                        return value;
+                if (!entry.getValue().isDisabled()) {
+                    try {
+                        Boolean value = entry.getValue().onNpcHeardNoise(npc, cachedNPCNoiseVector);
+                        if (value != null) {
+                            Events.emit(EventName.onNpcHeardNoise, npc, cachedNPCNoiseVector);
+                            return value;
+                        }
+                    } catch (Exception e) {
+                        catchException(e);
                     }
-                } catch (Exception e) {
-                    catchException(e);
                 }
             }
             Boolean value = Events.request(EventName.onNpcHeardNoise, npc, cachedNPCNoiseVector);
@@ -635,11 +726,14 @@ public class InternalServerEvents {
     }
 
     public void onObjectCreated(GameObject obj) {
+        objectsDestroyed.remove((Integer) obj.getId());
         allObjects.add(obj);
 
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onObjectCreated(obj);
+                if (!handler.isDisabled()) {
+                    handler.onObjectCreated(obj);
+                }
             } catch (Exception e) {
                 catchException(e);
             }
@@ -650,7 +744,9 @@ public class InternalServerEvents {
     public void onObjectDestroyed(GameObject obj) {
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onObjectDestroyed(obj);
+                if (!handler.isDisabled()) {
+                    handler.onObjectDestroyed(obj);
+                }
             } catch (Exception e) {
                 catchException(e);
             }
@@ -659,6 +755,7 @@ public class InternalServerEvents {
 
         clearGameEntityData(obj);
         allObjects.remove(obj);
+        objectsDestroyed.add(obj.getId());
     }
 
     public float onObjectReceiveDamage(GameObject obj, int source, int sourceId, int damagedByEntity, int damagedById, float damageToApply) {
@@ -669,14 +766,16 @@ public class InternalServerEvents {
 
     public Float onObjectReceiveDamage(GameObject obj, DamageEvent damageEvent) {
         for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
-            try {
-                Float newValue = entry.getValue().onObjectReceiveDamage(obj, damageEvent);
-                if (newValue != null) {
-                    Events.emit(EventName.onObjectReceiveDamage, obj, damageEvent);
-                    return newValue;
+            if (!entry.getValue().isDisabled()) {
+                try {
+                    Float newValue = entry.getValue().onObjectReceiveDamage(obj, damageEvent);
+                    if (newValue != null) {
+                        Events.emit(EventName.onObjectReceiveDamage, obj, damageEvent);
+                        return newValue;
+                    }
+                } catch (Exception e) {
+                    catchException(e);
                 }
-            } catch (Exception e) {
-                catchException(e);
             }
         }
         Float newValue = Events.request(EventName.onObjectReceiveDamage, obj, damageEvent);
@@ -692,7 +791,9 @@ public class InternalServerEvents {
 
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onObjectTouched(obj, entity);
+                if (!handler.isDisabled()) {
+                    handler.onObjectTouched(obj, entity);
+                }
             } catch (Exception e) {
                 catchException(e);
             }
@@ -703,7 +804,9 @@ public class InternalServerEvents {
     public void onObjectBroken(GameObject obj) {
         eventHandlers.forEach((name, handler) -> {
             try {
-                handler.onObjectBroken(obj);
+                if (!handler.isDisabled()) {
+                    handler.onObjectBroken(obj);
+                }
             } catch (Exception e) {
                 catchException(e);
             }

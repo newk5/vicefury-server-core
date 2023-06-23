@@ -20,6 +20,13 @@ public class ObjectSpawnProps {
         this.transform = transform;
     }
 
+    public ObjectSpawnProps(int modelId, Transform transform, boolean withCollision, boolean isDamageable) {
+        this.modelId = modelId;
+        this.withCollision = withCollision;
+        this.isDamageable = isDamageable;
+        this.transform = transform;
+    }
+
     public ObjectSpawnProps(Transform transform, boolean withCollision, boolean isDamageable) {
         this.withCollision = withCollision;
         this.isDamageable = isDamageable;
@@ -39,8 +46,6 @@ public class ObjectSpawnProps {
         isDamageable = status;
         return this;
     }
-
-   
 
     public boolean isDamageable() {
         return isDamageable;

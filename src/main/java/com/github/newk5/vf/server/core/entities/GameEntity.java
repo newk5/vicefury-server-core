@@ -1,5 +1,7 @@
 package com.github.newk5.vf.server.core.entities;
 
+import com.github.newk5.vf.server.core.InternalServerEvents;
+import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
@@ -31,19 +33,24 @@ public abstract class GameEntity {
             InvalidThreadException e = new InvalidThreadException("You cannot use the server API from outside the main server thread");
             Log.exception(e);
             return false;
+        } else {
+            return true;
         }
-        else return true;
     }
     
-    public Player asPlayer(){
+    public boolean isValid(){
+        return InternalServerEvents.isValid(this);
+    }
+
+    public Player asPlayer() {
         return (Player) this;
     }
-    
-    public Vehicle asVehicle(){
+
+    public Vehicle asVehicle() {
         return (Vehicle) this;
     }
-    
-    public NPC asNpc(){
+
+    public NPC asNpc() {
         return (NPC) this;
     }
 
@@ -57,6 +64,9 @@ public abstract class GameEntity {
         } else if (this instanceof NPC) {
             NPC p = (NPC) this;
             return p.getPosition();
+        } else if (this instanceof GameObject) {
+            GameObject obj = (GameObject) this;
+            return obj.getPosition();
         }
         return null;
     }

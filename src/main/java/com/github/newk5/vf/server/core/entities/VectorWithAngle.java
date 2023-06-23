@@ -30,6 +30,18 @@ public class VectorWithAngle {
         this.yawAngle = yawAngle;
     }
 
+    public Double distanceTo(Vector v2) {
+        return Math.sqrt((v2.x - x) * (v2.x - x) + (v2.y - y) * (v2.y - y) + (v2.z - z) * (v2.z - z));
+    }
+
+    public Double distanceTo(VectorWithAngle v2) {
+        return Math.sqrt((v2.x - x) * (v2.x - x) + (v2.y - y) * (v2.y - y) + (v2.z - z) * (v2.z - z));
+    }
+
+    public Vector asVector() {
+        return new Vector(x, y, z);
+    }
+
     public void setX(double x) {
         this.x = x;
     }

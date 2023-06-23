@@ -19,6 +19,10 @@ public class Transform {
         this.position = position;
         this.rotation = rotation;
     }
+    
+    public Transform createCopy(){
+        return new Transform(position.createCopy(), rotation.createCopy());
+    }
 
     public Vector getPosition() {
         return position;

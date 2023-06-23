@@ -41,7 +41,7 @@ public class GameTimer {
 
     protected void process() {
         try {
-            lastTick = System.currentTimeMillis();
+            setLastTick(System.currentTimeMillis());
             hasRunOnce = true;
             r.accept(this);
 
@@ -52,11 +52,11 @@ public class GameTimer {
     }
 
     protected boolean shouldRun() {
-        if (lastTick == 0) {
-            lastTick = System.currentTimeMillis();
+        if (getLastTick() == 0) {
+            setLastTick(System.currentTimeMillis());
         }
         long current = System.currentTimeMillis();
-        long v = (current - lastTick);
+        long v = (current - getLastTick());
         return v >= interval;
     }
 
@@ -72,9 +72,6 @@ public class GameTimer {
         return hasRunOnce;
     }
 
-    /**
-     * @param hasRunOnce the hasRunOnce to set
-     */
     public void cancel() {
         pendingCancellation = true;
     }
@@ -101,5 +98,14 @@ public class GameTimer {
 
     public long getInterval() {
         return interval;
+    }
+
+    public long getLastTick() {
+        return lastTick;
+    }
+
+
+    public void setLastTick(long lastTick) {
+        this.lastTick = lastTick;
     }
 }

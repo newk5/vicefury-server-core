@@ -14,6 +14,10 @@ public class Rotation {
         this.pitch = pitch;
         this.roll = roll;
     }
+    
+    public Rotation createCopy(){
+        return new Rotation(yaw, pitch, roll);
+    }
 
     public double getYaw() {
         return yaw;

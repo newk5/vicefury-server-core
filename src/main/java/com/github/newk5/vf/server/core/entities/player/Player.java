@@ -5,6 +5,7 @@ import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.GameEntityType;
 import com.github.newk5.vf.server.core.entities.Vector;
 import com.github.newk5.vf.server.core.entities.VectorWithAngle;
+import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
 
 public class Player extends GameEntity {
@@ -23,6 +24,32 @@ public class Player extends GameEntity {
 
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
+    }
+
+    private native void nativeKick(int id, String Reason);
+
+    public Player kick(String Reason) {
+        if (isOnMainThread()) {
+            nativeKick(id, Reason);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeKick(id, Reason);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeDetachObject(int id, int ObjectId);
+
+    public Player detachObject(GameObject o) {
+        if (isOnMainThread()) {
+            nativeDetachObject(id, o.getId());
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeDetachObject(id, o.getId());
+            });
+        }
+        return this;
     }
 
     private native double nativeGetMoveDirection(int id);
@@ -90,6 +117,15 @@ public class Player extends GameEntity {
             return this.nativeGetForwardVector(this.id);
         }
         return null;
+    }
+
+    private native boolean nativeHasObjectAttached(int id, int objectId);
+
+    public boolean hasObjectAttached(GameObject obj) {
+        if (threadIsValid()) {
+            return nativeHasObjectAttached(id, obj.getId());
+        }
+        return false;
     }
 
     private native Vector nativeGetRightVector(int id);

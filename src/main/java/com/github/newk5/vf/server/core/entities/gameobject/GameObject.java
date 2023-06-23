@@ -13,6 +13,16 @@ import com.github.newk5.vf.server.core.utils.Log;
 
 public class GameObject extends GameEntity {
 
+    public static int SMALL_RED_FLAG = 1;
+    public static int SMALL_BLUE_FLAG = 2;
+    public static int BLUE_FLAG = 3;
+    public static int RED_FLAG = 4;
+    public static int WOODEN_FENCE = 5;
+    public static int RAMP1 = 6;
+    public static int WOODEN_WALL1 = 7;
+    public static int RED_ARROW = 8;
+    public static int BLUE_ARROW = 9;
+
     private GameObject(int id) {
         super();
         this.id = id;
@@ -191,6 +201,13 @@ public class GameObject extends GameEntity {
             return nativeGetAttachedEntity(id);
         }
         return null;
+    }
+
+    public boolean isAttachedTo(GameEntity e) {
+        if (threadIsValid()) {
+            return (nativeIsAttached(id) && nativeGetAttachedEntity(id).equals(e));
+        }
+        return false;
     }
 
     private native int nativeAttachToEntity(int id, int entType, int entId, String socketName);

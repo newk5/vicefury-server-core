@@ -3,14 +3,12 @@ package com.github.newk5.vf.server.core.entities.npc;
 import com.github.newk5.vf.server.core.InternalServerEvents;
 import com.github.newk5.vf.server.core.controllers.NPCController;
 import com.github.newk5.vf.server.core.entities.*;
+import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.utils.Log;
-
-import java.util.HashSet;
 
 public class NPC extends GameEntity {
 
     private NPCType NPCType;
-    private HashSet<GameEntity> friends;
     private Class controllerClass;
     private NPCController controller;
 
@@ -31,6 +29,37 @@ public class NPC extends GameEntity {
             }
         }
         return this;
+    }
+
+    private native boolean nativeIsFriendly(int id, int entType, int entId);
+
+    public boolean isFriendly(GameEntity ent) {
+        if (threadIsValid()) {
+            return nativeIsFriendly(id, ent.type.value, ent.getId());
+        }
+        return false;
+    }
+
+    private native void nativeDetachObject(int id, int ObjectId);
+
+    public NPC detachObject(GameObject obj) {
+        if (isOnMainThread()) {
+            nativeDetachObject(id, obj.getId());
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeDetachObject(id, obj.getId());
+            });
+        }
+        return this;
+    }
+
+    private native boolean nativeHasObjectAttached(int id, int objectId);
+
+    public boolean hasObjectAttached(GameObject obj) {
+        if (threadIsValid()) {
+            return nativeHasObjectAttached(id, obj.getId());
+        }
+        return false;
     }
 
     private native double nativeGetMoveDirection(int id);

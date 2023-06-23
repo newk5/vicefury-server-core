@@ -1,6 +1,7 @@
 package com.github.newk5.vf.server.core;
 
 import com.github.newk5.vf.server.core.commands.CommandRegistry;
+import com.github.newk5.vf.server.core.controllers.BaseEventController;
 import com.github.newk5.vf.server.core.entities.*;
 import com.github.newk5.vf.server.core.entities.gameobject.EntitySocket;
 import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
@@ -27,6 +28,10 @@ public class Server {
 
     protected Server() {
         commandRegistry = new CommandRegistry();
+    }
+
+    public BaseEventController getEventHandler(String name) {
+        return PluginLoader.baseEvents.getEventHandler(name);
     }
 
     private boolean isOnMainThread() {
@@ -98,7 +103,28 @@ public class Server {
         }
     }
 
-    private native void nativeCreateEntitySocket(int entityType,String socketName, String socketBone, double x, double y, double z, double yaw, double pitch, double roll);
+    private native float nativeGetTime();
+
+    public float getTime() {
+        if (threadIsValid()) {
+            return nativeGetTime();
+        }
+        return 0;
+    }
+
+    private native float nativeSetTime(float time);
+
+    public void setTime(float time) {
+        if (isOnMainThread()) {
+            nativeSetTime(time);
+        } else {
+            mainThread(() -> {
+                nativeSetTime(time);
+            });
+        }
+    }
+
+    private native void nativeCreateEntitySocket(int entityType, String socketName, String socketBone, double x, double y, double z, double yaw, double pitch, double roll);
 
     public Server createEntitySocket(GameEntityType type, EntitySocket socket) {
         if (isOnMainThread()) {
@@ -283,6 +309,26 @@ public class Server {
             }
         } else {
             Log.exception("Unable to send client data to player: %d, channel: %s (Invalid data)", playerID, channel);
+        }
+
+        return this;
+    }
+
+    public Server sendDataToAll(String channel, String data) {
+        if (data != null) {
+            if (!isOnMainThread()) {
+                mainThread(() -> {
+                    players().forEach(p -> {
+                        nativeSendData(p.getId(), channel, data);
+                    });
+                });
+            } else {
+                players().forEach(p -> {
+                    nativeSendData(p.getId(), channel, data);
+                });
+            }
+        } else {
+            Log.exception("Unable to send client data to all players, channel: %s (Invalid data)", channel);
         }
 
         return this;

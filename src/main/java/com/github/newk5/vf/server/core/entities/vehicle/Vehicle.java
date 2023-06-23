@@ -2,6 +2,7 @@ package com.github.newk5.vf.server.core.entities.vehicle;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
 import com.github.newk5.vf.server.core.entities.*;
+import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.player.Player;
 
 public class Vehicle extends GameEntity {
@@ -10,6 +11,28 @@ public class Vehicle extends GameEntity {
         super();
         this.id = id;
         type = GameEntityType.VEHICLE;
+    }
+
+    private native void nativeDetachObject(int id, int ObjectId);
+
+    public Vehicle detachObject(GameObject obj) {
+        if (isOnMainThread()) {
+            nativeDetachObject(id, obj.getId());
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeDetachObject(id, obj.getId());
+            });
+        }
+        return this;
+    }
+
+    private native boolean nativeHasObjectAttached(int id, int objectId);
+
+    public boolean hasObjectAttached(GameObject obj) {
+        if (threadIsValid()) {
+            return nativeHasObjectAttached(id, obj.getId());
+        }
+        return false;
     }
 
     private native double nativeGetMoveDirection(int id);
