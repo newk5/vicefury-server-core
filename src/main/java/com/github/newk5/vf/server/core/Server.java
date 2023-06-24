@@ -54,7 +54,6 @@ public class Server {
 
     public List< NPC> getAllNPCs() {
         return new ArrayList<>(InternalServerEvents.allNpcs);
-
     }
 
     public void mainThread(Runnable r) {
@@ -106,15 +105,12 @@ public class Server {
     private native float nativeGetTime();
 
     public float getTime() {
-        if (threadIsValid()) {
-            return nativeGetTime();
-        }
-        return 0;
+        return threadIsValid() ? nativeGetTime() : 0;
     }
 
     private native float nativeSetTime(float time);
 
-    public void setTime(float time) {
+    public Server setTime(float time) {
         if (isOnMainThread()) {
             nativeSetTime(time);
         } else {
@@ -122,6 +118,7 @@ public class Server {
                 nativeSetTime(time);
             });
         }
+        return this;
     }
 
     private native void nativeCreateEntitySocket(int entityType, String socketName, String socketBone, double x, double y, double z, double yaw, double pitch, double roll);
@@ -298,6 +295,12 @@ public class Server {
 
     private native void nativeSendData(int playerID, String channel, String data);
 
+
+    public Server sendData(Player p, String channel, String data) {
+        sendData(p.getId(), channel, data);
+        return this;
+    }
+
     public Server sendData(int playerID, String channel, String data) {
         if (data != null) {
             if (!isOnMainThread()) {
@@ -310,7 +313,6 @@ public class Server {
         } else {
             Log.exception("Unable to send client data to player: %d, channel: %s (Invalid data)", playerID, channel);
         }
-
         return this;
     }
 
@@ -330,7 +332,6 @@ public class Server {
         } else {
             Log.exception("Unable to send client data to all players, channel: %s (Invalid data)", channel);
         }
-
         return this;
     }
 
@@ -400,11 +401,6 @@ public class Server {
         } else {
             return null;
         }
-    }
-
-    public Server sendData(Player p, String channel, String data) {
-        sendData(p.getId(), channel, data);
-        return this;
     }
 
     private native Vector nativeGetRandomPoint(double x, double y, double z, double radius);
