@@ -1,6 +1,6 @@
 package com.github.newk5.vf.server.core.utils;
 
-public class StringUtils {
+public class CoreUtils {
 
     public static String format(Object message, Object... args) {
         String msg = "";

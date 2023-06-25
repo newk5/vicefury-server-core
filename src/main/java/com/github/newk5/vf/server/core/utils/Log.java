@@ -31,7 +31,7 @@ public class Log {
     public static void exception(Object message, Object... args) {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
-        error("An unexpected error has occurred: %s", StringUtils.format(message, args));
+        error("An unexpected error has occurred: %s", CoreUtils.format(message, args));
         for (int i = 2; i < stackTrace.length; i++) {
             error("\t\tat %s", stackTrace[i]);
         }
@@ -41,7 +41,7 @@ public class Log {
         StackTraceElement[] stackTrace = e.getStackTrace();
 
         error("Cause: %s", e.toString());
-        error("An unexpected error has occurred: %s", StringUtils.format(message, args));
+        error("An unexpected error has occurred: %s", CoreUtils.format(message, args));
         for (StackTraceElement element : stackTrace) {
             error("\t\tat %s", element);
         }
@@ -57,35 +57,35 @@ public class Log {
     }
 
     public static void info(Object message, Object... args) {
-        String msg = StringUtils.format(message, args);
+        String msg = CoreUtils.format(message, args);
 
         print(Type.INF, msg);
         Logger.info(Thread.currentThread().getStackTrace()[2] + " " + msg);
     }
 
     public static void warn(Object message, Object... args) {
-        String msg = StringUtils.format(message, args);
+        String msg = CoreUtils.format(message, args);
 
         print(Type.WRN, msg);
         Logger.warn(Thread.currentThread().getStackTrace()[2] + " " + msg);
     }
 
     public static void debug(Object message, Object... args) {
-        String msg = StringUtils.format(message, args);
+        String msg = CoreUtils.format(message, args);
 
         print(Type.DBG, msg);
         Logger.debug(Thread.currentThread().getStackTrace()[2] + " " + msg);
     }
 
     public static void success(Object message, Object... args) {
-        String msg = StringUtils.format(message, args);
+        String msg = CoreUtils.format(message, args);
 
         print(Type.SCS, msg);
         Logger.info(msg);
     }
 
     public static void error(Object message, Object... args) {
-        String msg = StringUtils.format(message, args);
+        String msg = CoreUtils.format(message, args);
 
         print(Type.ERR, msg);
         Logger.error(msg);
