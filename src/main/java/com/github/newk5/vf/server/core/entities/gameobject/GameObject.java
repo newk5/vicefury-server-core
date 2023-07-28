@@ -1,14 +1,14 @@
 package com.github.newk5.vf.server.core.entities.gameobject;
 
+import com.github.newk5.vf.server.core.entities.AttachResult;
 import com.github.newk5.vf.server.core.InternalServerEvents;
 import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.GameEntityType;
 import com.github.newk5.vf.server.core.entities.Rotation;
 import com.github.newk5.vf.server.core.entities.Transform;
 import com.github.newk5.vf.server.core.entities.Vector;
-import static com.github.newk5.vf.server.core.entities.gameobject.ObjectAttachResult.ERROR_CANNOTATTACH;
-import static com.github.newk5.vf.server.core.entities.gameobject.ObjectAttachResult.ERROR_FAILEDTOFINDENTITY;
-import static com.github.newk5.vf.server.core.entities.gameobject.ObjectAttachResult.ERROR_INVALIDENTITYTYPE;
+import static com.github.newk5.vf.server.core.entities.AttachResult.ERROR_CANNOTATTACH;
+import static com.github.newk5.vf.server.core.entities.AttachResult.ERROR_INVALIDENTITYTYPE;
 import com.github.newk5.vf.server.core.utils.Log;
 
 public class GameObject extends GameEntity {
@@ -212,34 +212,37 @@ public class GameObject extends GameEntity {
 
     private native int nativeAttachToEntity(int id, int entType, int entId, String socketName);
 
-    public ObjectAttachResult attachTo(GameEntity entity, String socketName) {
-        int r = nativeAttachToEntity(id, entity.type.value, entity.getId(), socketName);
-        ObjectAttachResult result = ObjectAttachResult.value(r);
-        if (result.getCode() > 0) {
-            switch (result) {
-                case ERROR_FAILEDTOFINDSOCKET:
-                    Log.error(result.getDescription(), socketName);
-                    break;
-                case ERROR_FAILEDTOFINDOBJECT:
-                    Log.error(result.getDescription(), toString());
-                    break;
-                case ERROR_FAILEDTOFINDENTITY:
-                    Log.error(result.getDescription(), entity.toString());
-                    break;
-                case ERROR_INVALIDENTITYTYPE:
-                    Log.error(result.getDescription(), entity.type.value + "");
-                    break;
-                case ERROR_CANNOTATTACH:
-                    Log.error(result.getDescription(), toString());
-                    break;
-                case ERROR_ALREADYATTACHED:
-                    Log.error(result.getDescription(), getAttachedEntity().toString());
-                    break;
-                default:
-                    break;
+    public AttachResult attachTo(GameEntity entity, String socketName) {
+        if (threadIsValid()) {
+            int r = nativeAttachToEntity(id, entity.type.value, entity.getId(), socketName);
+            AttachResult result = AttachResult.value(r);
+            if (result.getCode() > 0) {
+                switch (result) {
+                    case ERROR_FAILEDTOFINDSOCKET:
+                        Log.error(result.getDescription(), socketName);
+                        break;
+                    case ERROR_FAILEDTOFINDSOURCEENTITY:
+                        Log.error(result.getDescription(), toString());
+                        break;
+                    case ERROR_FAILEDTOFINDTARGETENTITY:
+                        Log.error(result.getDescription(), entity.toString());
+                        break;
+                    case ERROR_INVALIDENTITYTYPE:
+                        Log.error(result.getDescription(), entity.type.value + "");
+                        break;
+                    case ERROR_CANNOTATTACH:
+                        Log.error(result.getDescription(), toString());
+                        break;
+                    case ERROR_ALREADYATTACHED:
+                        Log.error(result.getDescription(), getAttachedEntity().toString());
+                        break;
+                    default:
+                        break;
+                }
             }
+            return result;
         }
-        return result;
+        return null;
     }
 
     private native boolean nativeIsDamageable(int id);

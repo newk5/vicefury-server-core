@@ -4,7 +4,8 @@ public enum GameEntityType {
     PLAYER(1),
     VEHICLE(2),
     NPC(3),
-    OBJECT(4);
+    OBJECT(4),
+    ZONE(5);
 
     public final Integer value;
 

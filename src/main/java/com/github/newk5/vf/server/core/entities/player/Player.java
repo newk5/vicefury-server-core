@@ -22,6 +22,15 @@ public class Player extends GameEntity {
         return authenticated;
     }
 
+    private native boolean nativeHasWeapon(int id, int weaponId);
+
+    public boolean hasWeapon(int weaponId) {
+        if (threadIsValid()) {
+            return nativeHasWeapon(id, weaponId);
+        }
+        return false;
+    }
+
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
     }

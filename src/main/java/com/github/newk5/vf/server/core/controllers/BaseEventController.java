@@ -8,6 +8,7 @@ import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
+import com.github.newk5.vf.server.core.entities.zone.Zone;
 import com.github.newk5.vf.server.core.events.damage.DamageEvent;
 
 import java.net.URLClassLoader;
@@ -45,6 +46,10 @@ public abstract class BaseEventController {
     }
 
     public void onServerShutdown() {
+
+    }
+
+    public void onLowTPS(int limit, int current) {
 
     }
 
@@ -174,16 +179,26 @@ public abstract class BaseEventController {
 
     }
 
-    /**
-     * @return the disabled
-     */
+    public void onZoneCreated(Zone zone) {
+
+    }
+
+    public void onZoneDestroyed(Zone zone) {
+
+    }
+
+    public void onZoneEnter(Zone zone, GameEntity entity) {
+
+    }
+
+    public void onZoneLeave(Zone zone, GameEntity entity) {
+
+    }
+
     public boolean isDisabled() {
         return disabled;
     }
 
-    /**
-     * @param disabled the disabled to set
-     */
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
     }

@@ -3,6 +3,7 @@ package com.github.newk5.vf.server.core;
 import com.github.newk5.vf.server.core.commands.CommandRegistry;
 import com.github.newk5.vf.server.core.controllers.BaseEventController;
 import com.github.newk5.vf.server.core.entities.*;
+import static com.github.newk5.vf.server.core.entities.GameEntityType.OBJECT;
 import com.github.newk5.vf.server.core.entities.gameobject.EntitySocket;
 import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.gameobject.ObjectSpawnProps;
@@ -10,6 +11,8 @@ import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.npc.NPCSpawnProps;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
+import com.github.newk5.vf.server.core.entities.zone.Zone;
+import com.github.newk5.vf.server.core.entities.zone.ZoneSpawnProps;
 import com.github.newk5.vf.server.core.exceptions.InvalidThreadException;
 import com.github.newk5.vf.server.core.utils.Log;
 
@@ -18,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Server {
@@ -34,8 +38,83 @@ public class Server {
         return PluginLoader.baseEvents.getEventHandler(name);
     }
 
+    public Player findPlayer(Predicate<Player> condition) {
+        return InternalServerEvents.allPlayers.stream().filter(condition).findFirst().orElse(null);
+    }
+
+    public List<Player> findPlayers(Predicate<Player> condition) {
+        return InternalServerEvents.allPlayers.stream().filter(condition).collect(Collectors.toList());
+    }
+
+    public Vehicle findVehicle(Predicate<Vehicle> condition) {
+        return InternalServerEvents.allVehicles.stream().filter(condition).findFirst().orElse(null);
+    }
+
+    public NPC findNpc(Predicate<NPC> condition) {
+        return InternalServerEvents.allNpcs.stream().filter(condition).findFirst().orElse(null);
+    }
+
+    public GameObject findObject(Predicate<GameObject> condition) {
+        return InternalServerEvents.allObjects.stream().filter(condition).findFirst().orElse(null);
+    }
+
+    private native void nativeSetLowTPSWarningLimit(int limit);
+
+    public void setLowTPSWarningLimit(int limit) {
+        if (isOnMainThread()) {
+            nativeSetLowTPSWarningLimit(limit);
+        } else {
+            mainThread(() -> {
+                nativeSetLowTPSWarningLimit(limit);
+            });
+        }
+    }
+
+    private native int nativeGetTPS();
+
+    public int getTPS() {
+        return threadIsValid() ? this.nativeGetTPS() : -1;
+    }
+
     private boolean isOnMainThread() {
         return (this.threadId == Thread.currentThread().getId());
+    }
+
+    private native void nativeSpawnWeapon(int id, double x, double y, double z, int ammo);
+
+    public Server spawnWeapon(int weaponId, double x, double y, double z, int ammo) {
+        if (isOnMainThread()) {
+            nativeSpawnWeapon(weaponId, x, y, z, ammo);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSpawnWeapon(weaponId, x, y, z, ammo);
+            });
+        }
+        return this;
+    }
+
+    public Server spawnWeapon(int weaponId, Vector position, int ammo) {
+        if (isOnMainThread()) {
+            nativeSpawnWeapon(weaponId, position.x, position.y, position.z, ammo);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSpawnWeapon(weaponId, position.x, position.y, position.z, ammo);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeGiveWeaponToPlayer(int id, int PlayerId, int ammo);
+
+    public Server giveWeaponToPlayer(int weaponId, Player p, int ammo) {
+        if (isOnMainThread()) {
+            nativeGiveWeaponToPlayer(weaponId, p.getId(), ammo);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeGiveWeaponToPlayer(weaponId, p.getId(), ammo);
+            });
+        }
+        return this;
     }
 
     private boolean threadIsValid() {
@@ -69,6 +148,10 @@ public class Server {
         return new ArrayList<>(InternalServerEvents.allObjects);
     }
 
+    public List<Zone> getAllZones() {
+        return new ArrayList<>(InternalServerEvents.allZones);
+    }
+
     public void forEachPlayer(Consumer<Player> c) {
         for (Player p : InternalServerEvents.allPlayers) {
             c.accept(p);
@@ -97,11 +180,23 @@ public class Server {
         return InternalServerEvents.allObjects.stream();
     }
 
+    public Stream<Zone> zones() {
+        return InternalServerEvents.allZones.stream();
+    }
+
+    public void forEachZone(Consumer<Zone> obj) {
+        for (Zone o : InternalServerEvents.allZones) {
+            obj.accept(o);
+        }
+    }
+
     public void forEachObject(Consumer<GameObject> obj) {
         for (GameObject o : InternalServerEvents.allObjects) {
             obj.accept(o);
         }
     }
+
+    private native Zone nativeGetZone(int id);
 
     private native float nativeGetTime();
 
@@ -213,7 +308,15 @@ public class Server {
     private native Player nativeGetPlayer(int var1);
 
     public Player getPlayer(int id) {
-        return this.threadIsValid() ? this.nativeGetPlayer(id) : null;
+        if (this.threadIsValid()) {
+            Player p = nativeGetPlayer(id);
+            if (p == null || !p.isValid()) {
+                return null;
+            } else {
+                return p;
+            }
+        }
+        return null;
     }
 
     public GameEntity getGameEntity(int type, int id) {
@@ -229,6 +332,8 @@ public class Server {
                     return InternalServerEvents.server.getNPC(id);
                 case OBJECT:
                     return InternalServerEvents.server.getObject(id);
+                case ZONE:
+                    return InternalServerEvents.server.getZone(id);
             }
         }
         return null;
@@ -250,19 +355,56 @@ public class Server {
     private native Vehicle nativeGetVehicle(int id);
 
     public Vehicle getVehicle(int id) {
-        return this.threadIsValid() ? this.nativeGetVehicle(id) : null;
+        if (this.threadIsValid()) {
+            Vehicle v = nativeGetVehicle(id);
+            if (v == null || !v.isValid()) {
+                return null;
+            } else {
+                return v;
+            }
+        }
+        return null;
     }
 
     private native NPC nativeGetNPC(int ID);
 
     public NPC getNPC(int id) {
-        return this.threadIsValid() ? this.nativeGetNPC(id) : null;
+        if (this.threadIsValid()) {
+            NPC npc = nativeGetNPC(id);
+            if (npc == null || !npc.isValid()) {
+                return null;
+            } else {
+                return npc;
+            }
+        }
+        return null;
     }
 
     private native GameObject nativeGetObject(int ID);
 
     public GameObject getObject(int id) {
-        return this.threadIsValid() ? this.nativeGetObject(id) : null;
+        if (this.threadIsValid()) {
+            GameObject o = nativeGetObject(id);
+            if (o == null || !o.isValid()) {
+                return null;
+            } else {
+                return o;
+            }
+        }
+        return null;
+    }
+
+    public Zone getZone(int id) {
+        if (this.threadIsValid()) {
+            Zone z = nativeGetZone(id);
+
+            if (z == null || !z.isValid()) {
+                return null;
+            } else {
+                return z;
+            }
+        }
+        return null;
     }
 
     private native int nativeSpawnNPC(int NPCType, int Subtype, double x, double y, double z, double angle);
@@ -278,6 +420,21 @@ public class Server {
                     npc.setController(SpawnProperties.getControllerClass());
                 }
                 return npc;
+            }
+        }
+        return null;
+    }
+
+    private native int nativeSpawnZone(int type, double x, double y, double z, double yaw, double pitch, double roll, double sizeX, double sizeY, double height, int color);
+
+    public Zone spawnZone(ZoneSpawnProps spawnProps) {
+        if (threadIsValid()) {
+            Vector pos = spawnProps.getTransform().position;
+            Rotation rot = spawnProps.getTransform().rotation;
+            Integer id = nativeSpawnZone(spawnProps.getType().value, pos.x, pos.y, pos.z, rot.yaw, rot.pitch, rot.roll, spawnProps.getSizeX(), spawnProps.getSizeY(), spawnProps.getHeight(), spawnProps.getColor());
+
+            if (id > 0) {
+                return nativeGetZone(id);
             }
         }
         return null;

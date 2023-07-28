@@ -5,8 +5,12 @@ import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
+import com.github.newk5.vf.server.core.entities.zone.Zone;
 import com.github.newk5.vf.server.core.exceptions.InvalidThreadException;
 import com.github.newk5.vf.server.core.utils.Log;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import java.util.Map;
 import java.util.Objects;
@@ -19,6 +23,7 @@ public abstract class GameEntity {
     public GameEntityType type;
     protected int id;
     private GameData gameData;
+    private List<String> tags;
 
     public GameEntity() {
         this.threadId = Thread.currentThread().getId();
@@ -26,6 +31,67 @@ public abstract class GameEntity {
 
     protected boolean isOnMainThread() {
         return (this.threadId == Thread.currentThread().getId());
+    }
+
+    public List<String> getTags() {
+        if (tags == null) {
+            tags = new ArrayList<>();
+        }
+        return tags;
+    }
+
+    public GameEntity setTags(List<String> tags) {
+        this.tags = tags;
+        return this;
+    }
+
+    public boolean hasTag(String tag) {
+        if (tags == null) {
+            tags = new ArrayList<>();
+        }
+        return tags.contains(tag);
+    }
+
+    public boolean hasAnyTag(String... tagsVar) {
+        if (tags == null) {
+            tags = new ArrayList<>();
+        }
+        for (String tag : Arrays.asList(tagsVar)) {
+            if (tags.contains(tag)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public GameEntity addTag(String tag) {
+        if (tags == null) {
+            tags = new ArrayList<>();
+        }
+        tags.add(tag);
+        return this;
+    }
+
+    public GameEntity removeTag(String tag) {
+        if (tags == null) {
+            tags = new ArrayList<>();
+        }
+        tags.remove(tag);
+        return this;
+    }
+
+    public boolean isInsideZone(Zone z) {
+        if (z == null) {
+            return false;
+        }
+        return z.isEntityInside(this);
+    }
+    
+     public boolean isInsideSphereZone(Zone z) {
+        if (z == null) {
+            return false;
+        }
+        return z.isEntityInsideSphere(this);
     }
 
     protected boolean threadIsValid() {
@@ -37,8 +103,8 @@ public abstract class GameEntity {
             return true;
         }
     }
-    
-    public boolean isValid(){
+
+    public boolean isValid() {
         return InternalServerEvents.isValid(this);
     }
 
@@ -66,6 +132,9 @@ public abstract class GameEntity {
             return p.getPosition();
         } else if (this instanceof GameObject) {
             GameObject obj = (GameObject) this;
+            return obj.getPosition();
+        } else if (this instanceof Zone) {
+            Zone obj = (Zone) this;
             return obj.getPosition();
         }
         return null;
