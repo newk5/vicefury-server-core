@@ -10,7 +10,7 @@ public class Vehicle extends GameEntity {
     private Vehicle(int id) {
         super();
         this.id = id;
-        type = GameEntityType.VEHICLE;
+        this.type = GameEntityType.VEHICLE;
     }
 
     private native void nativeDetachObject(int id, int ObjectId);

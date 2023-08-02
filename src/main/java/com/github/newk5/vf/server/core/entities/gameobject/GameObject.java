@@ -1,14 +1,7 @@
 package com.github.newk5.vf.server.core.entities.gameobject;
 
-import com.github.newk5.vf.server.core.entities.AttachResult;
 import com.github.newk5.vf.server.core.InternalServerEvents;
-import com.github.newk5.vf.server.core.entities.GameEntity;
-import com.github.newk5.vf.server.core.entities.GameEntityType;
-import com.github.newk5.vf.server.core.entities.Rotation;
-import com.github.newk5.vf.server.core.entities.Transform;
-import com.github.newk5.vf.server.core.entities.Vector;
-import static com.github.newk5.vf.server.core.entities.AttachResult.ERROR_CANNOTATTACH;
-import static com.github.newk5.vf.server.core.entities.AttachResult.ERROR_INVALIDENTITYTYPE;
+import com.github.newk5.vf.server.core.entities.*;
 import com.github.newk5.vf.server.core.utils.Log;
 
 public class GameObject extends GameEntity {
@@ -27,7 +20,6 @@ public class GameObject extends GameEntity {
         super();
         this.id = id;
         this.type = GameEntityType.OBJECT;
-
     }
 
     @Override

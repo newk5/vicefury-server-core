@@ -44,7 +44,7 @@ public class CommandEntry {
         boolean noOptionals = !commandAnn.allParamsAreOptional() && !commandAnn.lastParamIsOptional();
 
         if (noOptionals && paramValues.size() != paramCount) {
-            throw new CommandParamCountException("Parameter count mistmatch in command: "+commandController.getClass().getName() +"."+method.getName() + ", Expected number of parameters: " + paramCount + " Received: " + paramValues.size());
+            throw new CommandParamCountException("Parameter count mismatch in command: " + commandController.getClass().getName() + "." + method.getName() + ", Expected number of parameters: " + paramCount + " Received: " + paramValues.size());
         }
 
         List<Object> convertedValues = new ArrayList<>();
@@ -78,9 +78,7 @@ public class CommandEntry {
     }
 
     public void runCommand(Object[] params) throws CommandParamCountException, CommandTypeResolverNotFound, InvalidParameterTypeException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-
         method.invoke(commandController, params);
-
     }
 
     public int getIndex() {
@@ -162,5 +160,4 @@ public class CommandEntry {
     public void setParams(List<CommandParam> params) {
         this.params = params;
     }
-
 }

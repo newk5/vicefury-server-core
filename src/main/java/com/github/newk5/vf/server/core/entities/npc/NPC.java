@@ -2,7 +2,10 @@ package com.github.newk5.vf.server.core.entities.npc;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
 import com.github.newk5.vf.server.core.controllers.NPCController;
-import com.github.newk5.vf.server.core.entities.*;
+import com.github.newk5.vf.server.core.entities.GameEntity;
+import com.github.newk5.vf.server.core.entities.GameEntityType;
+import com.github.newk5.vf.server.core.entities.Vector;
+import com.github.newk5.vf.server.core.entities.VectorWithAngle;
 import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.utils.Log;
 
@@ -15,7 +18,19 @@ public class NPC extends GameEntity {
     private NPC(int id) {
         super();
         this.id = id;
-        type = GameEntityType.NPC;
+        this.type = GameEntityType.NPC;
+    }
+
+    public NPCType getNPCType() {
+        return this.NPCType;
+    }
+
+    public NPCController getController() {
+        return this.controller;
+    }
+
+    public <T> T getCastedController() {
+        return (T) this.controller;
     }
 
     public NPC setController(Class controllerClass) {
@@ -29,6 +44,18 @@ public class NPC extends GameEntity {
             }
         }
         return this;
+    }
+
+    public static NPCSpawnProps SpawnProperties() {
+        return new NPCSpawnProps();
+    }
+
+    public static NPCSpawnProps SpawnProperties(NPCType type, Integer subtype) {
+        return new NPCSpawnProps(type, subtype);
+    }
+
+    public static NPCSpawnProps SpawnProperties(NPCType type, Integer subtype, Class controller) {
+        return new NPCSpawnProps(type, subtype, controller);
     }
 
     private native boolean nativeIsFriendly(int id, int entType, int entId);
@@ -68,14 +95,6 @@ public class NPC extends GameEntity {
         return threadIsValid() ? this.nativeGetMoveDirection(this.id) : -1;
     }
 
-    public NPCController getController() {
-        return controller;
-    }
-
-    public <T> T getCastedController() {
-        return (T) controller;
-    }
-
     public native boolean nativeCanMoveTo(int id, double x, double y, double z);
 
     public boolean canMoveTo(Vector location) {
@@ -83,22 +102,6 @@ public class NPC extends GameEntity {
             return nativeCanMoveTo(id, location.x, location.y, location.z);
         }
         return false;
-    }
-
-    public static NPCSpawnProps SpawnProperties() {
-        return new NPCSpawnProps();
-    }
-
-    public static NPCSpawnProps SpawnProperties(NPCType type, Integer subtype) {
-        return new NPCSpawnProps(type, subtype);
-    }
-
-    public static NPCSpawnProps SpawnProperties(NPCType type, Integer subtype, Class controller) {
-        return new NPCSpawnProps(type, subtype, controller);
-    }
-
-    public NPCType getNPCType() {
-        return NPCType;
     }
 
     private native void nativeDetachAllObjects(int id);
@@ -228,11 +231,11 @@ public class NPC extends GameEntity {
         return threadIsValid() ? this.nativeGetRightVector(this.id) : null;
     }
 
-    public void setPosition(Vector v) {
-        setPosition(v.getX(), v.getY(), v.getZ());
-    }
-
     private native void nativeSetPosition(int id, double X, double Y, double Z);
+
+    public NPC setPosition(Vector v) {
+        return this.setPosition(v.getX(), v.getY(), v.getZ());
+    }
 
     public NPC setPosition(double X, double Y, double Z) {
         if (isOnMainThread()) {

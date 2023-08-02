@@ -10,16 +10,41 @@ import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
 
 public class Player extends GameEntity {
 
+    private boolean authenticated;
+
     private Player(int id) {
         super();
         this.id = id;
-        type = GameEntityType.PLAYER;
-
+        this.type = GameEntityType.PLAYER;
     }
-    private boolean authenticated;
 
     public boolean isAuthenticated() {
-        return authenticated;
+        return this.authenticated;
+    }
+
+    public Player setAuthenticated(boolean authenticated) {
+        this.authenticated = authenticated;
+        return this;
+    }
+
+    public Player sendData(String channel, String data) {
+        InternalServerEvents.server.sendData(this.id, channel, data);
+        return this;
+    }
+
+    public Player sendChatMessage(int color, Object message, Object... args) {
+        InternalServerEvents.server.sendChatMessage(this.id, color, message, args);
+        return this;
+    }
+
+    public Player sendChatMessage(Object message, Object... args) {
+        InternalServerEvents.server.sendChatMessage(this.id, message, args);
+        return this;
+    }
+
+    public Player giveWeapon(int weaponId, int ammo) {
+        InternalServerEvents.server.giveWeaponToPlayer(this.id, weaponId, ammo);
+        return this;
     }
 
     private native boolean nativeHasWeapon(int id, int weaponId);
@@ -31,10 +56,6 @@ public class Player extends GameEntity {
         return false;
     }
 
-    public void setAuthenticated(boolean authenticated) {
-        this.authenticated = authenticated;
-    }
-
     private native void nativeKick(int id, String Reason);
 
     public Player kick(String Reason) {
@@ -43,19 +64,6 @@ public class Player extends GameEntity {
         } else {
             InternalServerEvents.server.mainThread(() -> {
                 nativeKick(id, Reason);
-            });
-        }
-        return this;
-    }
-
-    private native void nativeDetachObject(int id, int ObjectId);
-
-    public Player detachObject(GameObject o) {
-        if (isOnMainThread()) {
-            nativeDetachObject(id, o.getId());
-        } else {
-            InternalServerEvents.server.mainThread(() -> {
-                nativeDetachObject(id, o.getId());
             });
         }
         return this;
@@ -73,6 +81,19 @@ public class Player extends GameEntity {
         return threadIsValid() ? this.nativeGetBoneNames(this.id) : null;
     }
 
+    private native void nativeDetachObject(int id, int ObjectId);
+
+    public Player detachObject(GameObject o) {
+        if (isOnMainThread()) {
+            nativeDetachObject(id, o.getId());
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeDetachObject(id, o.getId());
+            });
+        }
+        return this;
+    }
+
     private native void nativeDetachAllObjects(int id);
 
     public Player detachAllObjects() {
@@ -84,6 +105,15 @@ public class Player extends GameEntity {
             });
         }
         return this;
+    }
+
+    private native boolean nativeHasObjectAttached(int id, int objectId);
+
+    public boolean hasObjectAttached(GameObject obj) {
+        if (threadIsValid()) {
+            return nativeHasObjectAttached(id, obj.getId());
+        }
+        return false;
     }
 
     private native Vehicle nativeGetVehicle(int id);
@@ -126,15 +156,6 @@ public class Player extends GameEntity {
             return this.nativeGetForwardVector(this.id);
         }
         return null;
-    }
-
-    private native boolean nativeHasObjectAttached(int id, int objectId);
-
-    public boolean hasObjectAttached(GameObject obj) {
-        if (threadIsValid()) {
-            return nativeHasObjectAttached(id, obj.getId());
-        }
-        return false;
     }
 
     private native Vector nativeGetRightVector(int id);
@@ -246,6 +267,89 @@ public class Player extends GameEntity {
         return this;
     }
 
+    private native int nativeGetSkin(int id);
+
+    public int getSkin() {
+        return threadIsValid() ? this.nativeGetSkin(this.id) : -1;
+    }
+
+    private native void nativeSetTeam(int id, int Team);
+
+    public Player setTeam(int team) {
+        if (isOnMainThread()) {
+            nativeSetTeam(id, team);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetTeam(id, team);
+            });
+        }
+        return this;
+    }
+
+    private native int nativeGetTeam(int id);
+
+    public int getTeam() {
+        return threadIsValid() ? this.nativeGetTeam(this.id) : -1;
+    }
+
+    private native void nativeSetColor(int id, int TeamColor);
+
+    public Player setColor(int color) {
+        if (isOnMainThread()) {
+            nativeSetColor(id, color);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetColor(id, color);
+            });
+        }
+        return this;
+    }
+
+    private native int nativeGetColor(int id);
+
+    public int getColor() {
+        return threadIsValid() ? this.nativeGetColor(this.id) : -1;
+    }
+
+    private native void nativeSetSpawnpoint(int playerId, double X, double Y, double Z, double yawAngle);
+
+    public Player setSpawnpoint(double X, double Y, double Z, double yawAngle) {
+        if (isOnMainThread()) {
+            nativeSetSpawnpoint(id, X, Y, Z, yawAngle);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetSpawnpoint(id, X, Y, Z, yawAngle);
+            });
+        }
+        return this;
+    }
+
+    public Player setSpawnpoint(VectorWithAngle pos) {
+        if (isOnMainThread()) {
+            nativeSetSpawnpoint(id, pos.x, pos.y, pos.z, pos.yawAngle);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetSpawnpoint(id, pos.x, pos.y, pos.z, pos.yawAngle);
+            });
+        }
+        return this;
+    }
+
+    private native VectorWithAngle nativeGetSpawnpoint(int id);
+
+    public VectorWithAngle getSpawnpoint() {
+        return threadIsValid() ? this.nativeGetSpawnpoint(this.id) : null;
+    }
+
+    private native boolean nativeIsSpawned(int id);
+
+    public boolean isSpawned() {
+        if (threadIsValid()) {
+            return nativeIsSpawned(id);
+        }
+        return false;
+    }
+
     private native boolean nativeIsShooting(int id);
 
     public boolean isShooting() {
@@ -334,89 +438,6 @@ public class Player extends GameEntity {
             return nativeIsStandingOnVehicle(id, v.getId());
         }
         return false;
-    }
-
-    private native void nativeSetTeam(int id, int Team);
-
-    public Player setTeam(int Team) {
-        if (isOnMainThread()) {
-            nativeSetTeam(id, Team);
-        } else {
-            InternalServerEvents.server.mainThread(() -> {
-                nativeSetTeam(id, Team);
-            });
-        }
-        return this;
-    }
-
-    private native int nativeGetTeam(int id);
-
-    public int getTeam() {
-        return threadIsValid() ? this.nativeGetTeam(this.id) : -1;
-    }
-
-    private native void nativeSetColor(int id, int TeamColor);
-
-    public Player setColor(int color) {
-        if (isOnMainThread()) {
-            nativeSetColor(id, color);
-        } else {
-            InternalServerEvents.server.mainThread(() -> {
-                nativeSetColor(id, color);
-            });
-        }
-        return this;
-    }
-
-    private native int nativeGetColor(int id);
-
-    public int getTeamColor() {
-        return threadIsValid() ? this.nativeGetColor(this.id) : -1;
-    }
-
-    private native void nativeSetSpawnpoint(int playerId, double X, double Y, double Z, double yawAngle);
-
-    public Player setSpawnpoint(double X, double Y, double Z, double yawAngle) {
-        if (isOnMainThread()) {
-            nativeSetSpawnpoint(id, X, Y, Z, yawAngle);
-        } else {
-            InternalServerEvents.server.mainThread(() -> {
-                nativeSetSpawnpoint(id, X, Y, Z, yawAngle);
-            });
-        }
-        return this;
-    }
-
-    public Player setSpawnpoint(VectorWithAngle pos) {
-        if (isOnMainThread()) {
-            nativeSetSpawnpoint(id, pos.x, pos.y, pos.z, pos.yawAngle);
-        } else {
-            InternalServerEvents.server.mainThread(() -> {
-                nativeSetSpawnpoint(id, pos.x, pos.y, pos.z, pos.yawAngle);
-            });
-        }
-        return this;
-    }
-
-    private native VectorWithAngle nativeGetSpawnpoint(int id);
-
-    public VectorWithAngle getSpawnpoint() {
-        return threadIsValid() ? this.nativeGetSpawnpoint(this.id) : null;
-    }
-
-    private native boolean nativeIsSpawned(int id);
-
-    public boolean isSpawned() {
-        if (threadIsValid()) {
-            return nativeIsSpawned(id);
-        }
-        return false;
-    }
-
-    private native int nativeGetSkin(int id);
-
-    public int getSkin() {
-        return threadIsValid() ? this.nativeGetSkin(this.id) : -1;
     }
 
     @Override

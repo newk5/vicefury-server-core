@@ -8,21 +8,17 @@ import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
 import com.github.newk5.vf.server.core.entities.zone.Zone;
 import com.github.newk5.vf.server.core.exceptions.InvalidThreadException;
 import com.github.newk5.vf.server.core.utils.Log;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class GameEntity {
 
-    private Map<String, Object> data = new ConcurrentHashMap<>();
     private long threadId;
     public GameEntityType type;
     protected int id;
     private GameData gameData;
+    private Map<String, Object> data;
     private List<String> tags;
 
     public GameEntity() {
@@ -31,67 +27,6 @@ public abstract class GameEntity {
 
     protected boolean isOnMainThread() {
         return (this.threadId == Thread.currentThread().getId());
-    }
-
-    public List<String> getTags() {
-        if (tags == null) {
-            tags = new ArrayList<>();
-        }
-        return tags;
-    }
-
-    public GameEntity setTags(List<String> tags) {
-        this.tags = tags;
-        return this;
-    }
-
-    public boolean hasTag(String tag) {
-        if (tags == null) {
-            tags = new ArrayList<>();
-        }
-        return tags.contains(tag);
-    }
-
-    public boolean hasAnyTag(String... tagsVar) {
-        if (tags == null) {
-            tags = new ArrayList<>();
-        }
-        for (String tag : Arrays.asList(tagsVar)) {
-            if (tags.contains(tag)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public GameEntity addTag(String tag) {
-        if (tags == null) {
-            tags = new ArrayList<>();
-        }
-        tags.add(tag);
-        return this;
-    }
-
-    public GameEntity removeTag(String tag) {
-        if (tags == null) {
-            tags = new ArrayList<>();
-        }
-        tags.remove(tag);
-        return this;
-    }
-
-    public boolean isInsideZone(Zone z) {
-        if (z == null) {
-            return false;
-        }
-        return z.isEntityInside(this);
-    }
-    
-     public boolean isInsideSphereZone(Zone z) {
-        if (z == null) {
-            return false;
-        }
-        return z.isEntityInsideSphere(this);
     }
 
     protected boolean threadIsValid() {
@@ -106,6 +41,118 @@ public abstract class GameEntity {
 
     public boolean isValid() {
         return InternalServerEvents.isValid(this);
+    }
+
+    public int getId() {
+        return this.id;
+    }
+
+    public GameData getGameData() {
+        return this.gameData;
+    }
+
+    public <T> T getCastedGameData() {
+        return (T) this.gameData;
+    }
+
+    public GameEntity setGameData(GameData gameData) {
+        this.gameData = gameData;
+        return this;
+    }
+
+    public Map<String, Object> getData() {
+        if (this.data == null) {
+            this.data = new ConcurrentHashMap<>();
+        }
+        return this.data;
+    }
+
+    public <T> T getData(String key) {
+        if (this.data != null) {
+            return (T) this.data.get(key);
+        }
+        return null;
+    }
+
+    public GameEntity putData(String key, Object value) {
+        if (this.data == null) {
+            this.data = new ConcurrentHashMap<>();
+        }
+        this.data.put(key, value);
+        return this;
+    }
+
+    public GameEntity removeData(String key) {
+        if (this.data != null) {
+            this.data.remove(key);
+        }
+        return this;
+    }
+
+    public GameEntity clearData() {
+        if(this.data != null) {
+            data.clear();
+        }
+        return this;
+    }
+
+    public boolean hasData(String key) {
+        if (this.data != null) {
+            return this.data.containsKey(key);
+        }
+        return false;
+    }
+
+    public boolean hasNonNullData(String key) {
+        return this.getData(key) != null;
+    }
+
+    public List<String> getTags() {
+        if (tags == null) {
+            tags = new ArrayList<>();
+        }
+        return tags;
+    }
+
+    public GameEntity setTags(List<String> tags) {
+        this.tags = tags;
+        return this;
+    }
+
+    public GameEntity addTag(String tag) {
+        if (tags == null) {
+            tags = new ArrayList<>();
+        }
+        tags.add(tag);
+        return this;
+    }
+
+    public GameEntity removeTag(String tag) {
+        if (tags != null) {
+            tags.remove(tag);
+        }
+        return this;
+    }
+
+    public GameEntity clearTags() {
+        if (this.tags != null) {
+            this.tags.clear();
+        }
+        return this;
+    }
+
+    public boolean hasTag(String tag) {
+        if (tags != null) {
+            return tags.contains(tag);
+        }
+        return false;
+    }
+
+    public boolean hasAnyTag(String... tags) {
+        if (this.tags != null) {
+            return Arrays.stream(tags).anyMatch(tag -> this.tags.contains(tag));
+        }
+        return false;
     }
 
     public Player asPlayer() {
@@ -140,51 +187,18 @@ public abstract class GameEntity {
         return null;
     }
 
-    public GameData getGameData() {
-        return gameData;
+    public boolean isInsideZone(Zone z) {
+        if (z == null) {
+            return false;
+        }
+        return z.isEntityInside(this);
     }
 
-    public void setGameData(GameData gameData) {
-        this.gameData = gameData;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public GameEntity putData(String key, Object v) {
-        data.put(key, v);
-        return this;
-    }
-
-    public void clearData() {
-        data.clear();
-    }
-
-    public <T> T getData(String key) {
-        return (T) data.get(key);
-    }
-
-    public <T> T getCastedGameData() {
-        return (T) gameData;
-    }
-
-    public GameEntity removeData(String key) {
-        data.remove(key);
-        return this;
-    }
-
-    public boolean hasData(String key) {
-        return data.containsKey(key);
-    }
-
-    public boolean hasNonNullData(String key) {
-        Object v = getData(key);
-        return v != null;
-    }
-
-    public Map<String, Object> getData() {
-        return data;
+    public boolean isInsideSphereZone(Zone z) {
+        if (z == null) {
+            return false;
+        }
+        return z.isEntityInsideSphere(this);
     }
 
     @Override

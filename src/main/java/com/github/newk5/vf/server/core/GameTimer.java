@@ -65,9 +65,6 @@ public class GameTimer {
         return (!isRecurring() && hasRunOnce);
     }
 
-    /**
-     * @return the hasRunOnce
-     */
     public boolean hasRunOnce() {
         return hasRunOnce;
     }
@@ -103,7 +100,6 @@ public class GameTimer {
     public long getLastTick() {
         return lastTick;
     }
-
 
     public void setLastTick(long lastTick) {
         this.lastTick = lastTick;

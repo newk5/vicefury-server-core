@@ -29,7 +29,7 @@ public class CommandParam {
             Resolve rr = param.getAnnotation(Resolve.class);
             r = registry.getNamedResolver(rr.value());
             if (r == null) {
-                throw new CommandTypeResolverNotFound("Failed to find Named Resolver '"+rr.value()+"' for datatype: " + type.getName() + ", if you want to be able to resolve this datatype, register a new namedResolver using the commandRegistry#registerNamedResolver method");
+                throw new CommandTypeResolverNotFound("Failed to find Named Resolver '" + rr.value() + "' for datatype: " + type.getName() + ", if you want to be able to resolve this datatype, register a new namedResolver using the commandRegistry#registerNamedResolver method");
             }
         } else {
             r = registry.getTypeResolver(type);

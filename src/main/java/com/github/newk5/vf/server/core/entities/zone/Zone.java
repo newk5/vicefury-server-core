@@ -1,18 +1,7 @@
 package com.github.newk5.vf.server.core.entities.zone;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
-import com.github.newk5.vf.server.core.entities.GameEntity;
-import com.github.newk5.vf.server.core.entities.GameEntityType;
-import com.github.newk5.vf.server.core.entities.Rotation;
-import com.github.newk5.vf.server.core.entities.Transform;
-import com.github.newk5.vf.server.core.entities.Vector;
-import com.github.newk5.vf.server.core.entities.Vector2D;
-import com.github.newk5.vf.server.core.entities.AttachResult;
-import static com.github.newk5.vf.server.core.entities.AttachResult.ERROR_ALREADYATTACHED;
-import static com.github.newk5.vf.server.core.entities.AttachResult.ERROR_CANNOTATTACH;
-
-import static com.github.newk5.vf.server.core.entities.AttachResult.ERROR_FAILEDTOFINDSOCKET;
-import static com.github.newk5.vf.server.core.entities.AttachResult.ERROR_INVALIDENTITYTYPE;
+import com.github.newk5.vf.server.core.entities.*;
 import com.github.newk5.vf.server.core.utils.Log;
 
 public class Zone extends GameEntity {
@@ -20,7 +9,7 @@ public class Zone extends GameEntity {
     private Zone(int id) {
         super();
         this.id = id;
-        type = GameEntityType.ZONE;
+        this.type = GameEntityType.ZONE;
     }
 
     private native boolean nativeIsCircleShaped(int id);
@@ -407,5 +396,4 @@ public class Zone extends GameEntity {
         }
         return this;
     }
-
 }
