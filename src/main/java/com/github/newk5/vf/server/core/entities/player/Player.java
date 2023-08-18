@@ -32,12 +32,12 @@ public class Player extends GameEntity {
         return this;
     }
 
-    public Player sendChatMessage(int color, Object message, Object... args) {
+    public Player sendChatMessage(int color, String message, Object... args) {
         InternalServerEvents.server.sendChatMessage(this.id, color, message, args);
         return this;
     }
 
-    public Player sendChatMessage(Object message, Object... args) {
+    public Player sendChatMessage(String message, Object... args) {
         InternalServerEvents.server.sendChatMessage(this.id, message, args);
         return this;
     }

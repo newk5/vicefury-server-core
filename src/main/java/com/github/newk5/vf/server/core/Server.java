@@ -296,11 +296,11 @@ public class Server {
 
     private native void nativeSendChatMessageToAll(int var1, String var2);
 
-    public Server sendChatMessage(Object message, Object... args) {
+    public Server sendChatMessage(String message, Object... args) {
         return this.sendChatMessage(-1, message, args);
     }
 
-    public Server sendChatMessage(int color, Object message, Object... args) {
+    public Server sendChatMessage(int color, String message, Object... args) {
         String msg = CoreUtils.format(message, args);
 
         if (isOnMainThread()) {
@@ -315,15 +315,15 @@ public class Server {
 
     private native void nativeSendChatMessageToPlayer(int var1, int var2, String var3);
 
-    public Server sendChatMessage(Player player, Object message, Object... args) {
+    public Server sendChatMessage(Player player, String message, Object... args) {
         return this.sendChatMessage(player.getId(), -1, message, args);
     }
 
-    public Server sendChatMessage(Player player, int color, Object message, Object... args) {
+    public Server sendChatMessage(Player player, int color, String message, Object... args) {
         return this.sendChatMessage(player.getId(), color, message, args);
     }
 
-    public Server sendChatMessage(int playerId, int color, Object message, Object... args) {
+    public Server sendChatMessage(int playerId, int color, String message, Object... args) {
         String msg = CoreUtils.format(message, args);
 
         if (isOnMainThread()) {
