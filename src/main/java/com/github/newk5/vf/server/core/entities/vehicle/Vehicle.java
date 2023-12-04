@@ -5,7 +5,7 @@ import com.github.newk5.vf.server.core.entities.*;
 import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.player.Player;
 
-public class Vehicle extends GameEntity {
+public class Vehicle extends DamageableEntity {
 
     private Vehicle(int id) {
         super();
@@ -135,18 +135,18 @@ public class Vehicle extends GameEntity {
         return this;
     }
 
-    private native boolean nativeIsPassenger(int id, int playerID);
+    private native boolean nativeIsPassenger(int id, int entType, int playerID);
 
     public boolean isPassenger(Player p) {
         if (threadIsValid()) {
-            return nativeIsPassenger(id, p.getId());
+            return nativeIsPassenger(id, GameEntityType.PLAYER.value, p.getId());
         }
         return false;
     }
 
     public boolean isPassenger(int playerID) {
         if (threadIsValid()) {
-            return nativeIsPassenger(id, playerID);
+            return nativeIsPassenger(id, GameEntityType.PLAYER.value, playerID);
         }
         return false;
     }

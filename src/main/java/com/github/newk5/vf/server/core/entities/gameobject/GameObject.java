@@ -9,9 +9,10 @@ import com.github.newk5.vf.server.core.entities.Transform;
 import com.github.newk5.vf.server.core.entities.Vector;
 import static com.github.newk5.vf.server.core.entities.AttachResult.ERROR_CANNOTATTACH;
 import static com.github.newk5.vf.server.core.entities.AttachResult.ERROR_INVALIDENTITYTYPE;
+import com.github.newk5.vf.server.core.entities.DamageableEntity;
 import com.github.newk5.vf.server.core.utils.Log;
 
-public class GameObject extends GameEntity {
+public class GameObject extends DamageableEntity {
 
     public static int SMALL_RED_FLAG = 1;
     public static int SMALL_BLUE_FLAG = 2;
@@ -28,6 +29,38 @@ public class GameObject extends GameEntity {
         this.id = id;
         this.type = GameEntityType.OBJECT;
 
+    }
+
+    private native boolean nativeIsOverlapping(int id, int entityType, int entityId);
+
+    public boolean isOverlapping(GameEntity ent) {
+        if (isOnMainThread()) {
+            return nativeIsOverlapping(id, ent.type.value, ent.getId());
+        }
+        return false;
+    }
+
+    private native void nativeSetOverlapEventsEnabled(int id, boolean Value);
+
+    public GameObject setOverlapEventsEnabled(boolean Value) {
+        if (isOnMainThread()) {
+            nativeSetOverlapEventsEnabled(id, Value);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetOverlapEventsEnabled(id, Value);
+            });
+
+        }
+        return this;
+    }
+
+    private native boolean nativeHasOverlapEventsEnabled(int id);
+
+    public boolean hasOverlapEventsEnabled() {
+        if (threadIsValid()) {
+            return nativeHasOverlapEventsEnabled(id);
+        }
+        return false;
     }
 
     @Override
@@ -274,8 +307,9 @@ public class GameObject extends GameEntity {
 
     private native double nativeGetHealth(int id);
 
-    public double getHealth() {
-        return threadIsValid() ? this.nativeGetHealth(this.id) : -1;
+    @Override
+    public float getHealth() {
+        return (float) (threadIsValid() ? this.nativeGetHealth(this.id) : -1);
     }
 
     private native String nativeGetName(int id);

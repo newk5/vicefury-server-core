@@ -9,6 +9,7 @@ import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.gameobject.ObjectSpawnProps;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.npc.NPCSpawnProps;
+import com.github.newk5.vf.server.core.entities.npc.NPCType;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
 import com.github.newk5.vf.server.core.entities.zone.Zone;
@@ -18,6 +19,7 @@ import com.github.newk5.vf.server.core.utils.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -29,13 +31,15 @@ public class Server {
     private long threadId = Thread.currentThread().getId();
     private long timerCounter;
     public CommandRegistry commandRegistry;
+    private InternalServerEvents baseServerEvents;
 
-    protected Server() {
+    protected Server(InternalServerEvents internalEvents) {
         commandRegistry = new CommandRegistry();
+        baseServerEvents = internalEvents;
     }
 
     public BaseEventController getEventHandler(String name) {
-        return PluginLoader.baseEvents.getEventHandler(name);
+        return baseServerEvents.getEventHandler(name);
     }
 
     public Player findPlayer(Predicate<Player> condition) {
@@ -50,12 +54,46 @@ public class Server {
         return InternalServerEvents.allVehicles.stream().filter(condition).findFirst().orElse(null);
     }
 
+    public List<Vehicle> findVehicles(Predicate<Vehicle> condition) {
+        return InternalServerEvents.allVehicles.stream().filter(condition).collect(Collectors.toList());
+    }
+
     public NPC findNpc(Predicate<NPC> condition) {
         return InternalServerEvents.allNpcs.stream().filter(condition).findFirst().orElse(null);
     }
 
+    public List<NPC> findNpcs(Predicate<NPC> condition) {
+        return InternalServerEvents.allNpcs.stream().filter(condition).collect(Collectors.toList());
+    }
+
     public GameObject findObject(Predicate<GameObject> condition) {
         return InternalServerEvents.allObjects.stream().filter(condition).findFirst().orElse(null);
+    }
+
+    public List<GameObject> findObjects(Predicate<GameObject> condition) {
+        return InternalServerEvents.allObjects.stream().filter(condition).collect(Collectors.toList());
+    }
+
+    private native void nativeGiveWeaponToShooterNPC(int id, int weaponId, int ammo);
+
+    public Server giveWeaponToNPC(NPC npc, int weaponId, int ammo, boolean equip) {
+        if (npc.getNPCType() != NPCType.SHOOTER) {
+            return this;
+        }
+        if (isOnMainThread()) {
+            nativeGiveWeaponToShooterNPC(npc.getId(), weaponId, ammo);
+            if (equip) {
+                npc.switchToWeapon(weaponId);
+            }
+        } else {
+            mainThread(() -> {
+                nativeGiveWeaponToShooterNPC(npc.getId(), weaponId, ammo);
+                if (equip) {
+                    npc.switchToWeapon(weaponId);
+                }
+            });
+        }
+        return this;
     }
 
     private native void nativeSetLowTPSWarningLimit(int limit);
@@ -86,7 +124,7 @@ public class Server {
         if (isOnMainThread()) {
             nativeSpawnWeapon(weaponId, x, y, z, ammo);
         } else {
-            InternalServerEvents.server.mainThread(() -> {
+            mainThread(() -> {
                 nativeSpawnWeapon(weaponId, x, y, z, ammo);
             });
         }
@@ -97,7 +135,7 @@ public class Server {
         if (isOnMainThread()) {
             nativeSpawnWeapon(weaponId, position.x, position.y, position.z, ammo);
         } else {
-            InternalServerEvents.server.mainThread(() -> {
+            mainThread(() -> {
                 nativeSpawnWeapon(weaponId, position.x, position.y, position.z, ammo);
             });
         }
@@ -110,7 +148,7 @@ public class Server {
         if (isOnMainThread()) {
             nativeGiveWeaponToPlayer(weaponId, p.getId(), ammo);
         } else {
-            InternalServerEvents.server.mainThread(() -> {
+            mainThread(() -> {
                 nativeGiveWeaponToPlayer(weaponId, p.getId(), ammo);
             });
         }
@@ -125,6 +163,12 @@ public class Server {
         } else {
             return true;
         }
+    }
+
+    public <T> T findClosestTo(List<? extends GameEntity> entities, Vector position) {
+        return (T) entities.stream().min(Comparator.comparingDouble(ent -> {
+            return position.distanceTo(ent.getPosition());
+        })).orElse(null);
     }
 
     public List<Player> getAllPlayers() {
@@ -227,7 +271,7 @@ public class Server {
                     socket.getTransform().rotation.yaw, socket.getTransform().rotation.pitch, socket.getTransform().rotation.roll
             );
         } else {
-            InternalServerEvents.server.mainThread(() -> {
+            mainThread(() -> {
                 nativeCreateEntitySocket(
                         type.value,
                         socket.getName(), socket.getBone(),
@@ -322,15 +366,15 @@ public class Server {
         if (t != null) {
             switch (t) {
                 case PLAYER:
-                    return InternalServerEvents.server.getPlayer(id);
+                    return getPlayer(id);
                 case VEHICLE:
-                    return InternalServerEvents.server.getVehicle(id);
+                    return getVehicle(id);
                 case NPC:
-                    return InternalServerEvents.server.getNPC(id);
+                    return getNPC(id);
                 case OBJECT:
-                    return InternalServerEvents.server.getObject(id);
+                    return getObject(id);
                 case ZONE:
-                    return InternalServerEvents.server.getZone(id);
+                    return getZone(id);
             }
         }
         return null;
@@ -415,6 +459,9 @@ public class Server {
                 NPC npc = getNPC(id);
                 if (SpawnProperties.getControllerClass() != null) {
                     npc.setController(SpawnProperties.getControllerClass());
+                    if (npc.getController() != null) {
+                        npc.getController().onCreated();
+                    }
                 }
                 return npc;
             }
@@ -431,7 +478,9 @@ public class Server {
             Integer id = nativeSpawnZone(spawnProps.getType().value, pos.x, pos.y, pos.z, rot.yaw, rot.pitch, rot.roll, spawnProps.getSizeX(), spawnProps.getSizeY(), spawnProps.getHeight(), spawnProps.getColor());
 
             if (id > 0) {
-                return nativeGetZone(id);
+                Zone z = nativeGetZone(id);
+                z.zoneType = spawnProps.getType();
+                return z;
             }
         }
         return null;
@@ -451,7 +500,6 @@ public class Server {
     }
 
     private native void nativeSendData(int playerID, String channel, String data);
-
 
     public Server sendData(Player p, String channel, String data) {
         sendData(p.getId(), channel, data);
@@ -500,7 +548,9 @@ public class Server {
             }
             GameTimer timer = new GameTimer(name, recurring, interval, r);
             timerCounter++;
-            InternalServerEvents.timers.add(timer);
+            mainThread(() -> {
+                InternalServerEvents.timers.add(timer);
+            });
             return timer;
         } else {
             return null;
@@ -520,7 +570,9 @@ public class Server {
         if (threadIsValid()) {
             GameTimer timer = new GameTimer(System.nanoTime() + timerCounter + "", recurring, interval, r);
             timerCounter++;
-            InternalServerEvents.timers.add(timer);
+            mainThread(() -> {
+                InternalServerEvents.timers.add(timer);
+            });
             return timer;
         } else {
             return null;
@@ -531,7 +583,9 @@ public class Server {
         if (threadIsValid()) {
             GameTimer timer = new GameTimer(System.nanoTime() + timerCounter + "", true, interval, r, stopCondition);
             timerCounter++;
-            InternalServerEvents.timers.add(timer);
+            mainThread(() -> {
+                InternalServerEvents.timers.add(timer);
+            });
             return timer;
         } else {
             return null;
@@ -540,9 +594,13 @@ public class Server {
 
     public GameTimer delay(long delay, Consumer<GameTimer> r) {
         if (threadIsValid()) {
+
             GameTimer timer = new GameTimer(System.nanoTime() + timerCounter + "", false, delay, r);
             timerCounter++;
-            InternalServerEvents.timers.add(timer);
+            mainThread(() -> {
+                InternalServerEvents.timers.add(timer);
+            });
+
             return timer;
         } else {
             return null;
@@ -553,7 +611,9 @@ public class Server {
         if (threadIsValid()) {
             GameTimer timer = new GameTimer(System.nanoTime() + timerCounter + "", true, interval, r);
             timerCounter++;
-            InternalServerEvents.timers.add(timer);
+            mainThread(() -> {
+                InternalServerEvents.timers.add(timer);
+            });
             return timer;
         } else {
             return null;
@@ -576,5 +636,32 @@ public class Server {
             return nativeFindRotationLookingAt(from.x, from.y, from.z, to.x, to.y, to.z);
         }
         return null;
+    }
+
+    private native Vector nativeFindDirectionLookingAt(double fromX, double fromY, double fromZ, double toX, double toY, double toZ);
+
+    public Vector findDirectionLookingAt(Vector from, Vector to) {
+        if (threadIsValid()) {
+            return nativeFindDirectionLookingAt(from.x, from.y, from.z, to.x, to.y, to.z);
+        }
+        return null;
+    }
+
+    private native void nativePutNpcInVehicle(int id, int VehicleId);
+
+    public Server putNpcInVehicle(int npcId, int VehicleId) {
+        if (isOnMainThread()) {
+            nativePutNpcInVehicle(npcId, VehicleId);
+        } else {
+            mainThread(() -> {
+                nativePutNpcInVehicle(npcId, VehicleId);
+            });
+        }
+        return this;
+    }
+
+    public Server putNpcInVehicle(NPC npc, Vehicle veh) {
+        putNpcInVehicle(npc.getId(), veh.getId());
+        return this;
     }
 }

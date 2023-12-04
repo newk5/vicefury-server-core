@@ -14,10 +14,10 @@ public class BooleanResolver extends BaseTypeResolver {
         if (input == null) {
             return false;
         }
-        if (input.equals("no") || input.equals("n") || input.equals("false") || input.equals("0")) {
+        if (input.equals("off") || input.equals("no") || input.equals("n") || input.equals("false") || input.equals("0")) {
             return false;
         }
-        if (input.equals("yes") || input.equals("y") || input.equals("yes") || input.equals("1")) {
+        if (input.equals("on") ||input.equals("yes") || input.equals("y") || input.equals("yes") || input.equals("1")) {
             return true;
         }
         throw new InvalidParameterTypeException("Failed to resolve boolean input '" + input + "' to boolean");

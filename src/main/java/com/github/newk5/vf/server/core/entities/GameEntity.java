@@ -10,6 +10,7 @@ import com.github.newk5.vf.server.core.exceptions.InvalidThreadException;
 import com.github.newk5.vf.server.core.utils.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import java.util.Map;
@@ -29,6 +30,18 @@ public abstract class GameEntity {
         this.threadId = Thread.currentThread().getId();
     }
 
+    public <T> T findClosest(List<? extends GameEntity> entities) {
+        return (T) entities.stream().min(Comparator.comparingDouble(ent -> {
+            return getPosition().distanceTo(ent.getPosition());
+        })).orElse(null);
+    }
+
+    public Vector getClosest(List<Vector> positions) {
+        return positions.stream().min(Comparator.comparingDouble(pos -> {
+            return getPosition().distanceTo(pos);
+        })).orElse(null);
+    }
+
     protected boolean isOnMainThread() {
         return (this.threadId == Thread.currentThread().getId());
     }
@@ -38,6 +51,14 @@ public abstract class GameEntity {
             tags = new ArrayList<>();
         }
         return tags;
+    }
+
+    public Vector directionTo(GameEntity ent) {
+        return InternalServerEvents.server.findDirectionLookingAt(getPosition(), ent.getPosition());
+    }
+
+    public Vector directionTo(Vector location) {
+        return InternalServerEvents.server.findDirectionLookingAt(getPosition(), location);
     }
 
     public GameEntity setTags(List<String> tags) {
@@ -86,8 +107,8 @@ public abstract class GameEntity {
         }
         return z.isEntityInside(this);
     }
-    
-     public boolean isInsideSphereZone(Zone z) {
+
+    public boolean isInsideSphereZone(Zone z) {
         if (z == null) {
             return false;
         }

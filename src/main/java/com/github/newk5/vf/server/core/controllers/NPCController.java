@@ -5,7 +5,10 @@ import com.github.newk5.vf.server.core.Server;
 import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.npc.NPCAction;
 import com.github.newk5.vf.server.core.entities.Vector;
+import com.github.newk5.vf.server.core.entities.Weapon;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
+import com.github.newk5.vf.server.core.entities.player.Player;
+import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
 import com.github.newk5.vf.server.core.events.damage.DamageEvent;
 
 public abstract class NPCController {
@@ -17,17 +20,17 @@ public abstract class NPCController {
         this.npc = npc;
         this.server = InternalServerEvents.server;
     }
-    
+
     public void onCreated() {
-        
+
     }
 
     public void onDestroy() {
 
     }
-    
+
     public void onSpawned() {
-        
+
     }
 
     public void onDeath(DamageEvent damageEvent) {
@@ -52,5 +55,67 @@ public abstract class NPCController {
 
     public void onHeardNoise(Vector noiseLocation) {
 
+    }
+
+    public void onWeaponReceived(Weapon wep, boolean equipped) {
+
+    }
+
+    public void onWeaponRemoved(Weapon wep, boolean equipped) {
+
+    }
+
+    public void onEnterVehicle(Vehicle v) {
+
+    }
+
+    public void onLeaveVehicle(Vehicle v) {
+
+    }
+
+    public void onLocationReached(String location) {
+
+    }
+
+    public void onEnemyDied(GameEntity enemy) {
+
+    }
+
+    public void onEnemyLeftTheServer(Player p) {
+
+    }
+
+    public void onEnemyEnterVehicle(GameEntity ent, Vehicle vehicle, boolean asDriver) {
+
+    }
+
+    public void onEnemyLeaveVehicle(GameEntity ent, Vehicle vehicle, boolean asDriver) {
+
+    }
+
+    public void onFollowTargetDied(GameEntity enemy) {
+
+    }
+
+    public void onFollowTargetLeftTheServer(Player p) {
+
+    }
+
+    public void onFollowTargetEnterVehicle(GameEntity ent, Vehicle vehicle, boolean asDriver) {
+
+    }
+
+    public void onFollowTargetLeaveVehicle(GameEntity ent, Vehicle vehicle, boolean asDriver) {
+
+    }
+    
+    public void onFollowTargetReached(GameEntity target) {
+
+    }
+    public void onBeforeAttack(GameEntity target) {
+        
+    }
+    public void onRanOutOfAmmo(int weapon){
+        
     }
 }

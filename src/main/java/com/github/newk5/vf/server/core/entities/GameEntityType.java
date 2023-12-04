@@ -1,6 +1,7 @@
 package com.github.newk5.vf.server.core.entities;
 
 public enum GameEntityType {
+    UNDEFINED(0),
     PLAYER(1),
     VEHICLE(2),
     NPC(3),

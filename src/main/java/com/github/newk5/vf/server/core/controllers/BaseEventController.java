@@ -1,9 +1,11 @@
 package com.github.newk5.vf.server.core.controllers;
 
+import com.github.newk5.vf.server.core.PluginLoader;
 import com.github.newk5.vf.server.core.Server;
 import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.npc.NPCAction;
 import com.github.newk5.vf.server.core.entities.Vector;
+import com.github.newk5.vf.server.core.entities.Weapon;
 import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.player.Player;
@@ -20,6 +22,7 @@ public abstract class BaseEventController {
     private int position;
     private String controllerName;
     protected boolean disabled;
+    public PluginLoader pluginLoader;
 
     public BaseEventController() {
 
@@ -146,16 +149,15 @@ public abstract class BaseEventController {
 
     }
 
-    public Boolean onNpcGainedSightOf(NPC npc, GameEntity entity) {
-        return null;
+    public void onNpcGainedSightOf(NPC npc, GameEntity entity) {
+
     }
 
-    public Boolean onNpcLostSightOf(NPC npc, GameEntity entity) {
-        return null;
+    public void onNpcLostSightOf(NPC npc, GameEntity entity) {
+
     }
 
-    public Boolean onNpcHeardNoise(NPC npc, Vector noiseLocation) {
-        return null;
+    public void onNpcHeardNoise(NPC npc, Vector noiseLocation) {
 
     }
 
@@ -172,6 +174,14 @@ public abstract class BaseEventController {
     }
 
     public void onObjectTouched(GameObject obj, GameEntity gameEntity) {
+
+    }
+
+    public void onObjectOverlapped(GameObject obj, GameEntity gameEntity) {
+
+    }
+
+    public void onObjecStoppedOverlapping(GameObject obj, GameEntity gameEntity) {
 
     }
 
@@ -192,6 +202,78 @@ public abstract class BaseEventController {
     }
 
     public void onZoneLeave(Zone zone, GameEntity entity) {
+
+    }
+
+    public void onNpcWeaponReceived(NPC npc, Weapon wep, boolean equipped) {
+
+    }
+
+    public void onNpcWeaponRemoved(NPC npc, Weapon wep, boolean equipped) {
+
+    }
+
+    public void onPlayerWeaponReceived(Player player, Weapon wep, boolean equipped) {
+
+    }
+
+    public void onPlayerWeaponRemoved(Player player, Weapon wep, boolean equipped) {
+
+    }
+
+    public void onNpcEnterVehicle(NPC npc, Vehicle vehicle) {
+
+    }
+
+    public void onNpcLeaveVehicle(NPC npc, Vehicle vehicle) {
+
+    }
+
+    public void onNpcReachedLocation(NPC npc, String location) {
+
+    }
+
+    public void onNpcEnemyDied(NPC npc, GameEntity ent) {
+
+    }
+
+    public void onNpcEnemyLeftServer(NPC npc, Player player) {
+
+    }
+
+    public void onNpcEnemyEnterVehicle(NPC npc, GameEntity ent, Vehicle vehicle, boolean asDriver) {
+
+    }
+
+    public void onNpcEnemyLeaveVehicle(NPC npc, GameEntity ent, Vehicle vehicle, boolean asDriver) {
+
+    }
+
+    public void onNpcFollowTargetDied(NPC npc, GameEntity ent) {
+
+    }
+
+    public void onNpcFollowTargetLeftServer(NPC npc, Player player) {
+
+    }
+
+    public void onNpcFollowTargetEnterVehicle(NPC npc, GameEntity ent, Vehicle vehicle, boolean asDriver) {
+
+    }
+
+    public void onNpcFollowTargetLeaveVehicle(NPC npc, GameEntity ent, Vehicle vehicle, boolean asDriver) {
+
+    }
+
+    public void onNpcReachedFollowTarget(NPC npc, GameEntity ent) {
+
+    }
+
+    public void onNpcRanOutOfAmmo(NPC npc, int weapon) {
+
+    }
+
+    public void onNpcIsAboutToAttack(NPC npc, GameEntity ent) {
 
     }
 

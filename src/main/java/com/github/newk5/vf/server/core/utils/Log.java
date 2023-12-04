@@ -48,6 +48,7 @@ public class Log {
     }
 
     public static void exception(Exception e) {
+        Logger.error(e);
         StackTraceElement[] stackTrace = e.getStackTrace();
 
         error("An unexpected error has occurred: %s", e.toString());

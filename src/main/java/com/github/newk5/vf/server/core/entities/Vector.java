@@ -1,5 +1,7 @@
 package com.github.newk5.vf.server.core.entities;
 
+import com.github.newk5.vf.server.core.utils.MathUtils;
+
 public class Vector {
 
     public double x;
@@ -41,6 +43,22 @@ public class Vector {
 
     public Vector add(Vector v) {
         return new Vector(x + v.x, y + v.y, z + v.z);
+    }
+
+    public double dotProduct(Vector other) {
+        return (this.x * other.x) + (this.y * other.y) + (this.z * other.z);
+    }
+
+    public Vector pushInDirection(Vector direction, double distance) {
+        return MathUtils.pushPointInDirection(this, direction, distance);
+    }
+
+    public Vector crossProduct(Vector other) {
+        double resultX = (this.y * other.z) - (this.z * other.y);
+        double resultY = (this.z * other.x) - (this.x * other.z);
+        double resultZ = (this.x * other.y) - (this.y * other.x);
+
+        return new Vector(resultX, resultY, resultZ);
     }
 
     public Vector subtract(double v) {

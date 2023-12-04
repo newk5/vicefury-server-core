@@ -1,17 +1,18 @@
 package com.github.newk5.vf.server.core.entities.npc;
 
-public enum NPCType {
-    ZOMBIE(1),
-    SHOOTER(2);
+public enum ShooterAttackStrategy {
+    STATIC(0),
+    MOVEABLE(1),
+    EVASIVE(2);
 
     public final Integer value;
 
-    NPCType(int v) {
+    ShooterAttackStrategy(int v) {
         this.value = v;
     }
 
-    public static NPCType value(int v) {
-        for (NPCType e : values()) {
+    public static ShooterAttackStrategy value(int v) {
+        for (ShooterAttackStrategy e : values()) {
             if (e.value == v) {
                 return e;
             }

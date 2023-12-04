@@ -18,6 +18,7 @@ import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.tinylog.Logger;
 
 public class CommandRegistry {
 
@@ -115,11 +116,14 @@ public class CommandRegistry {
                         }
                     });
                     index++;
+                } else {
+                    Log.warn("IGNORED COMMAND: %s.%s MARKED WITH COMMAND ANNOTATION, BUT WITHOUT PLAYER PARAMETER", m.getDeclaringClass().getName(), m.getName());
                 }
-                else Log.warn("IGNORED COMMAND: %s.%s MARKED WITH COMMAND ANNOTATION, BUT WITHOUT PLAYER PARAMETER", m.getDeclaringClass().getName(), m.getName());
             });
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.exception(e);
         }
-        catch (Exception e) { Log.exception(e); }
     }
 
     private boolean firstParamIsPlayer(Method m) {
@@ -184,13 +188,14 @@ public class CommandRegistry {
                     System.arraycopy(params, 0, merged, player.length, params.length);
                     cmd.runCommand(merged);
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 if (e instanceof CommandParamCountException && totalParams == 0) {
                     if (logExceptionsWhenCmdsAreUsedWithoutParams) {
+                        e.printStackTrace();
                         Log.exception(e);
                     }
                 } else {
+                    e.printStackTrace();
                     Log.exception(e);
                 }
 

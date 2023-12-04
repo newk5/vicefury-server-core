@@ -5,7 +5,8 @@ public enum NPCAction {
     ATTACKING(1),
     INVESTIGATING(2),
     MOVING_TO_TARGET(3),
-    MOVING_TO_LOCATION(4);
+    MOVING_TO_LOCATION(4),
+    FOLLOWING(5);
 
     public final Integer value;
 

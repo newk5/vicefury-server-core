@@ -1,14 +1,20 @@
 package com.github.newk5.vf.server.core.entities.player;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
+import com.github.newk5.vf.server.core.entities.DamageableEntity;
 import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.GameEntityType;
 import com.github.newk5.vf.server.core.entities.Vector;
 import com.github.newk5.vf.server.core.entities.VectorWithAngle;
+import com.github.newk5.vf.server.core.entities.Weapon;
 import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Player extends GameEntity {
+public class Player extends DamageableEntity {
+
+    private List<Weapon> weapons;
 
     private Player(int id) {
         super();
@@ -16,10 +22,155 @@ public class Player extends GameEntity {
         type = GameEntityType.PLAYER;
 
     }
+
     private boolean authenticated;
 
     public boolean isAuthenticated() {
         return authenticated;
+    }
+
+    private native void nativeEnableFreeCam(int id);
+
+    public Player enableFreeCam() {
+        if (isOnMainThread()) {
+            nativeEnableFreeCam(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeEnableFreeCam(id);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeDisableFreeCam(int id);
+
+    public Player disableFreeCam() {
+        if (isOnMainThread()) {
+            nativeDisableFreeCam(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeDisableFreeCam(id);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeSetPlayerStoredWeaponAmmo(int id, int WeaponId, int Ammo);
+
+    public Player setStoredWeaponAmmo(int WeaponId, int Ammo) {
+        if (isOnMainThread()) {
+            nativeSetPlayerStoredWeaponAmmo(id, WeaponId, Ammo);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetPlayerStoredWeaponAmmo(id, WeaponId, Ammo);
+            });
+        }
+        return this;
+    }
+
+    private native int nativeGetPlayerStoredWeaponAmmo(int id, int weaponId);
+
+    public int getStoredWeaponAmmo(int weaponId) {
+        return threadIsValid() ? this.nativeGetPlayerStoredWeaponAmmo(this.id, weaponId) : -1;
+    }
+
+    private native void nativeRemovePlayerWeapon(int id, int WeaponId);
+
+    public Player removeWeapon(int WeaponId) {
+        if (isOnMainThread()) {
+            nativeRemovePlayerWeapon(id, WeaponId);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeRemovePlayerWeapon(id, WeaponId);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeKeepPlayerWeaponsOnRespawn(int id, boolean status);
+
+    public Player keepWeaponsOnRespawn(boolean status) {
+        if (isOnMainThread()) {
+            nativeKeepPlayerWeaponsOnRespawn(id, status);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeKeepPlayerWeaponsOnRespawn(id, status);
+            });
+        }
+        return this;
+    }
+
+    public Weapon getWeapon(int weaponId) {
+        return getWeapons().stream().filter(wep -> wep.getWeaponId() == weaponId).findFirst().orElse(null);
+    }
+
+    public List<Weapon> getWeapons() {
+        if (weapons == null) {
+            weapons = new ArrayList<>();
+        }
+        return weapons;
+    }
+
+    private native double nativeGetUpVector(int id);
+
+    public double getUpVector() {
+        return threadIsValid() ? this.nativeGetUpVector(this.id) : -1;
+    }
+
+    private native float nativeGetWeaponDamage(int id, int weaponId);
+
+    public float getWeaponDamage(int weaponId) {
+        return threadIsValid() ? this.nativeGetWeaponDamage(this.id, weaponId) : -1;
+    }
+
+    private native void nativeSetWeaponDamage(int id, int WeaponId, float WeaponDmg);
+
+    public Player setWeaponDamage(int WeaponId, float WeaponDmg) {
+        if (isOnMainThread()) {
+            nativeSetWeaponDamage(id, WeaponId, WeaponDmg);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetWeaponDamage(id, WeaponId, WeaponDmg);
+            });
+        }
+        return this;
+    }
+
+    private native float nativeGetWeaponRange(int id, int weaponId);
+
+    public float getWeaponRange(int weaponId) {
+        return threadIsValid() ? this.nativeGetWeaponRange(this.id, weaponId) : -1;
+    }
+
+    private native void nativeSetWeaponRange(int id, int WeaponId, float WeaponRange);
+
+    public Player setWeaponRange(int WeaponId, float WeaponRange) {
+        if (isOnMainThread()) {
+            nativeSetWeaponRange(id, WeaponId, WeaponRange);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetWeaponRange(id, WeaponId, WeaponRange);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeLaunch(int id, double directionX, double directionY, double directionZ, double force, boolean additive);
+
+    public Player launch(double directionX, double directionY, double directionZ, double force, boolean additive) {
+        if (isOnMainThread()) {
+            nativeLaunch(id, directionX, directionY, directionZ, force, additive);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeLaunch(id, directionX, directionY, directionZ, force, additive);
+            });
+        }
+        return this;
+    }
+
+    public Player launch(Vector direction, double force, boolean additive) {
+        launch(direction.x, direction.y, direction.z, force, additive);
+        return this;
     }
 
     private native boolean nativeHasWeapon(int id, int weaponId);

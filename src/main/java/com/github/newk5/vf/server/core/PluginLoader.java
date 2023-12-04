@@ -18,8 +18,8 @@ import java.util.Iterator;
 
 public class PluginLoader {
 
-    public static InternalServerEvents baseEvents;
-    public static String launchPath;
+    public InternalServerEvents baseEvents;
+    public String launchPath;
 
     public PluginLoader() {
     }
@@ -34,7 +34,7 @@ public class PluginLoader {
         events.clearData();
         AnsiConsole.systemInstall();
         long start = System.currentTimeMillis();
-        Server server = new Server();
+        Server server = new Server(baseEvents);
         Log.info("LOADING LIB AT: %s", libPath);
 
         loadEvents(events, server);
@@ -75,7 +75,7 @@ public class PluginLoader {
                 Class c = (Class) it.next();
                 BaseEventController ev = (BaseEventController) c.getConstructors()[0].newInstance();
                 ev.server = server;
-
+                ev.pluginLoader = this;
                 if (c.isAnnotationPresent(EventHandler.class)) {
                     EventHandler eh = (EventHandler) c.getAnnotation(EventHandler.class);
                     ev.setPosition(eh.position());

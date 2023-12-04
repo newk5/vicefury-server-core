@@ -17,6 +17,7 @@ import com.github.newk5.vf.server.core.utils.Log;
 
 public class Zone extends GameEntity {
 
+    public ZoneType zoneType;
     private Zone(int id) {
         super();
         this.id = id;
