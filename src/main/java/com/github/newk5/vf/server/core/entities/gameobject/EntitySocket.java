@@ -40,5 +40,4 @@ public class EntitySocket {
     public void setTransform(Transform transform) {
         this.transform = transform;
     }
-
 }

@@ -3,11 +3,11 @@ package com.github.newk5.vf.server.core.controllers;
 import com.github.newk5.vf.server.core.PluginLoader;
 import com.github.newk5.vf.server.core.Server;
 import com.github.newk5.vf.server.core.entities.GameEntity;
-import com.github.newk5.vf.server.core.entities.npc.NPCAction;
 import com.github.newk5.vf.server.core.entities.Vector;
 import com.github.newk5.vf.server.core.entities.Weapon;
 import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
+import com.github.newk5.vf.server.core.entities.npc.NPCAction;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
 import com.github.newk5.vf.server.core.entities.zone.Zone;
@@ -25,15 +25,6 @@ public abstract class BaseEventController {
     public PluginLoader pluginLoader;
 
     public BaseEventController() {
-
-    }
-
-    public String getControllerName() {
-        return controllerName;
-    }
-
-    public void setControllerName(String controllerName) {
-        this.controllerName = controllerName;
     }
 
     public int getPosition() {
@@ -44,11 +35,23 @@ public abstract class BaseEventController {
         this.position = position;
     }
 
-    public void onServerStart() {
-
+    public String getControllerName() {
+        return controllerName;
     }
 
-    public void onServerShutdown() {
+    public void setControllerName(String controllerName) {
+        this.controllerName = controllerName;
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
+
+    public void onTick() {
 
     }
 
@@ -56,7 +59,11 @@ public abstract class BaseEventController {
 
     }
 
-    public void onTick() {
+    public void onServerStart() {
+
+    }
+
+    public void onServerShutdown() {
 
     }
 
@@ -108,22 +115,6 @@ public abstract class BaseEventController {
 
     }
 
-    public void onVehicleCreated(Vehicle vehicle) {
-
-    }
-
-    public void onVehicleDestroyed(Vehicle vehicle) {
-
-    }
-
-    public void onVehicleExploded(Vehicle vehicle) {
-
-    }
-
-    public Float onVehicleReceiveDamage(Vehicle vehicle, DamageEvent damageEvent) {
-        return null;
-    }
-
     public void onNpcCreated(NPC npc) {
 
     }
@@ -159,6 +150,22 @@ public abstract class BaseEventController {
 
     public void onNpcHeardNoise(NPC npc, Vector noiseLocation) {
 
+    }
+
+    public void onVehicleCreated(Vehicle vehicle) {
+
+    }
+
+    public void onVehicleDestroyed(Vehicle vehicle) {
+
+    }
+
+    public void onVehicleExploded(Vehicle vehicle) {
+
+    }
+
+    public Float onVehicleReceiveDamage(Vehicle vehicle, DamageEvent damageEvent) {
+        return null;
     }
 
     public void onObjectCreated(GameObject obj) {
@@ -277,11 +284,4 @@ public abstract class BaseEventController {
 
     }
 
-    public boolean isDisabled() {
-        return disabled;
-    }
-
-    public void setDisabled(boolean disabled) {
-        this.disabled = disabled;
-    }
 }

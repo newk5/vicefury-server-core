@@ -86,5 +86,4 @@ public class ZoneSpawnProps {
     public void setTransform(Transform transform) {
         this.transform = transform;
     }
-
 }

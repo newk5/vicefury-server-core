@@ -3,7 +3,6 @@ package com.github.newk5.vf.server.core;
 import com.github.newk5.vf.server.core.commands.CommandRegistry;
 import com.github.newk5.vf.server.core.controllers.BaseEventController;
 import com.github.newk5.vf.server.core.entities.*;
-import static com.github.newk5.vf.server.core.entities.GameEntityType.OBJECT;
 import com.github.newk5.vf.server.core.entities.gameobject.EntitySocket;
 import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
 import com.github.newk5.vf.server.core.entities.gameobject.ObjectSpawnProps;
@@ -15,6 +14,7 @@ import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
 import com.github.newk5.vf.server.core.entities.zone.Zone;
 import com.github.newk5.vf.server.core.entities.zone.ZoneSpawnProps;
 import com.github.newk5.vf.server.core.exceptions.InvalidThreadException;
+import com.github.newk5.vf.server.core.utils.CoreUtils;
 import com.github.newk5.vf.server.core.utils.Log;
 
 import java.util.ArrayList;
@@ -38,8 +38,96 @@ public class Server {
         baseServerEvents = internalEvents;
     }
 
+    private boolean isOnMainThread() {
+        return (this.threadId == Thread.currentThread().getId());
+    }
+
+    private boolean threadIsValid() {
+        if (this.threadId != Thread.currentThread().getId()) {
+            InvalidThreadException e = new InvalidThreadException("You cannot use the server API from outside the main server thread, use server.mainThread(()-> {  }) to run this on the main thread");
+            Log.exception(e);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public void mainThread(Runnable r) {
+        InternalServerEvents.queue.offer(r);
+    }
+
     public BaseEventController getEventHandler(String name) {
         return baseServerEvents.getEventHandler(name);
+    }
+
+    public List<Player> getAllPlayers() {
+        return new ArrayList<>(InternalServerEvents.allPlayers);
+    }
+
+    public List< NPC> getAllNPCs() {
+        return new ArrayList<>(InternalServerEvents.allNpcs);
+    }
+
+    public List<Vehicle> getAllVehicles() {
+        return new ArrayList<>(InternalServerEvents.allVehicles);
+    }
+
+    public List<GameObject> getAllObjects() {
+        return new ArrayList<>(InternalServerEvents.allObjects);
+    }
+
+    public List<Zone> getAllZones() {
+        return new ArrayList<>(InternalServerEvents.allZones);
+    }
+
+    public void forEachPlayer(Consumer<Player> c) {
+        for (Player p : InternalServerEvents.allPlayers) {
+            c.accept(p);
+        }
+    }
+
+    public void forEachNpc(Consumer<NPC> c) {
+        for (NPC p : InternalServerEvents.allNpcs) {
+            c.accept(p);
+        }
+    }
+
+    public void forEachVehicle(Consumer<Vehicle> c) {
+        for (Vehicle v : InternalServerEvents.allVehicles) {
+            c.accept(v);
+        }
+    }
+
+    public void forEachObject(Consumer<GameObject> obj) {
+        for (GameObject o : InternalServerEvents.allObjects) {
+            obj.accept(o);
+        }
+    }
+
+    public void forEachZone(Consumer<Zone> obj) {
+        for (Zone o : InternalServerEvents.allZones) {
+            obj.accept(o);
+        }
+    }
+
+    public Stream<Player> players() {
+        return InternalServerEvents.allPlayers.stream();
+    }
+
+    public Stream<NPC> npcs() {
+        return InternalServerEvents.allNpcs.stream();
+    }
+
+    public Stream<Vehicle> vehicles() {
+        return InternalServerEvents.allVehicles.stream();
+    }
+
+    public Stream<GameObject> objects() {
+        return InternalServerEvents.allObjects.stream();
+    }
+
+    public Stream<Zone> zones() {
+        return InternalServerEvents.allZones.stream();
     }
 
     public Player findPlayer(Predicate<Player> condition) {
@@ -98,7 +186,7 @@ public class Server {
 
     private native void nativeSetLowTPSWarningLimit(int limit);
 
-    public void setLowTPSWarningLimit(int limit) {
+    public Server setLowTPSWarningLimit(int limit) {
         if (isOnMainThread()) {
             nativeSetLowTPSWarningLimit(limit);
         } else {
@@ -106,6 +194,7 @@ public class Server {
                 nativeSetLowTPSWarningLimit(limit);
             });
         }
+        return this;
     }
 
     private native int nativeGetTPS();
@@ -114,8 +203,17 @@ public class Server {
         return threadIsValid() ? this.nativeGetTPS() : -1;
     }
 
-    private boolean isOnMainThread() {
-        return (this.threadId == Thread.currentThread().getId());
+    private native void nativeSetSpawnScreenLocation(double X, double Y, double Z, double yawLookAt);
+
+    public Server setSpawnScreenLocation(VectorWithAngle pos) {
+        if (isOnMainThread()) {
+            nativeSetSpawnScreenLocation(pos.x, pos.y, pos.z, pos.yawAngle);
+        } else {
+            mainThread(() -> {
+                nativeSetSpawnScreenLocation(pos.x, pos.y, pos.z, pos.yawAngle);
+            });
+        }
+        return this;
     }
 
     private native void nativeSpawnWeapon(int id, double x, double y, double z, int ammo);
@@ -144,26 +242,22 @@ public class Server {
 
     private native void nativeGiveWeaponToPlayer(int id, int PlayerId, int ammo);
 
-    public Server giveWeaponToPlayer(int weaponId, Player p, int ammo) {
+    public Server giveWeaponToPlayer(Player player, int weaponId, int ammo) {
+        return this.giveWeaponToPlayer(player.getId(), weaponId, ammo);
+    }
+
+    public Server giveWeaponToPlayer(int playerId, int weaponId, int ammo) {
         if (isOnMainThread()) {
-            nativeGiveWeaponToPlayer(weaponId, p.getId(), ammo);
+            nativeGiveWeaponToPlayer(weaponId, playerId, ammo);
         } else {
             mainThread(() -> {
-                nativeGiveWeaponToPlayer(weaponId, p.getId(), ammo);
+                nativeGiveWeaponToPlayer(weaponId, playerId, ammo);
             });
         }
         return this;
     }
 
-    private boolean threadIsValid() {
-        if (this.threadId != Thread.currentThread().getId()) {
-            InvalidThreadException e = new InvalidThreadException("You cannot use the server API from outside the main server thread, use server.mainThread(()-> {  }) to run this on the main thread");
-            Log.exception(e);
-            return false;
-        } else {
-            return true;
-        }
-    }
+  
 
     public <T> T findClosestTo(List<? extends GameEntity> entities, Vector position) {
         return (T) entities.stream().min(Comparator.comparingDouble(ent -> {
@@ -171,73 +265,6 @@ public class Server {
         })).orElse(null);
     }
 
-    public List<Player> getAllPlayers() {
-        return new ArrayList<>(InternalServerEvents.allPlayers);
-    }
-
-    public List< NPC> getAllNPCs() {
-        return new ArrayList<>(InternalServerEvents.allNpcs);
-    }
-
-    public void mainThread(Runnable r) {
-        InternalServerEvents.queue.offer(r);
-    }
-
-    public List<Vehicle> getAllVehicles() {
-        return new ArrayList<>(InternalServerEvents.allVehicles);
-    }
-
-    public List<GameObject> getAllObjects() {
-        return new ArrayList<>(InternalServerEvents.allObjects);
-    }
-
-    public List<Zone> getAllZones() {
-        return new ArrayList<>(InternalServerEvents.allZones);
-    }
-
-    public void forEachPlayer(Consumer<Player> c) {
-        for (Player p : InternalServerEvents.allPlayers) {
-            c.accept(p);
-        }
-    }
-
-    public void forEachNpc(Consumer<NPC> c) {
-        for (NPC p : InternalServerEvents.allNpcs) {
-            c.accept(p);
-        }
-    }
-
-    public Stream<Player> players() {
-        return InternalServerEvents.allPlayers.stream();
-    }
-
-    public Stream<NPC> npcs() {
-        return InternalServerEvents.allNpcs.stream();
-    }
-
-    public Stream<Vehicle> vehicles() {
-        return InternalServerEvents.allVehicles.stream();
-    }
-
-    public Stream<GameObject> objects() {
-        return InternalServerEvents.allObjects.stream();
-    }
-
-    public Stream<Zone> zones() {
-        return InternalServerEvents.allZones.stream();
-    }
-
-    public void forEachZone(Consumer<Zone> obj) {
-        for (Zone o : InternalServerEvents.allZones) {
-            obj.accept(o);
-        }
-    }
-
-    public void forEachObject(Consumer<GameObject> obj) {
-        for (GameObject o : InternalServerEvents.allObjects) {
-            obj.accept(o);
-        }
-    }
 
     private native Zone nativeGetZone(int id);
 
@@ -294,25 +321,18 @@ public class Server {
 
     private native void nativeSendChatMessageToAll(int var1, String var2);
 
-    public Server sendChatMessage(int color, String message) {
-        if (isOnMainThread()) {
-            this.nativeSendChatMessageToAll(color, message);
-        } else {
-            mainThread(() -> {
-                this.nativeSendChatMessageToAll(color, message);
-            });
-        }
-        return this;
+    public Server sendChatMessage(String message, Object... args) {
+        return this.sendChatMessage(-1, message, args);
     }
 
-    public Server sendChatMessage(String message) {
+    public Server sendChatMessage(int color, String message, Object... args) {
+        String msg = CoreUtils.format(message, args);
+
         if (isOnMainThread()) {
-            int color = -1;
-            this.nativeSendChatMessageToAll(color, message);
+            this.nativeSendChatMessageToAll(color, msg);
         } else {
             mainThread(() -> {
-                int color = -1;
-                this.nativeSendChatMessageToAll(color, message);
+                this.nativeSendChatMessageToAll(color, msg);
             });
         }
         return this;
@@ -320,27 +340,22 @@ public class Server {
 
     private native void nativeSendChatMessageToPlayer(int var1, int var2, String var3);
 
-    public Server sendChatMessage(Player p, String message, int color) {
-        if (isOnMainThread()) {
-            int id = p.getId();
-            this.nativeSendChatMessageToPlayer(id, color, message);
-        } else {
-            mainThread(() -> {
-                int id = p.getId();
-                this.nativeSendChatMessageToPlayer(id, color, message);
-            });
-        }
-        return this;
+    public Server sendChatMessage(Player player, String message, Object... args) {
+        return this.sendChatMessage(player.getId(), -1, message, args);
     }
 
-    public Server sendChatMessage(Player p, String message) {
+    public Server sendChatMessage(Player player, int color, String message, Object... args) {
+        return this.sendChatMessage(player.getId(), color, message, args);
+    }
+
+    public Server sendChatMessage(int playerId, int color, String message, Object... args) {
+        String msg = CoreUtils.format(message, args);
+
         if (isOnMainThread()) {
-            int color = -1;
-            this.nativeSendChatMessageToPlayer(p.getId(), color, message);
+            this.nativeSendChatMessageToPlayer(playerId, color, msg);
         } else {
             mainThread(() -> {
-                int color = -1;
-                this.nativeSendChatMessageToPlayer(p.getId(), color, message);
+                this.nativeSendChatMessageToPlayer(playerId, color, msg);
             });
         }
         return this;
@@ -379,20 +394,7 @@ public class Server {
         }
         return null;
     }
-
-    private native void nativeSetSpawnScreenLocation(double X, double Y, double Z, double yawLookAt);
-
-    public Server setSpawnScreenLocation(VectorWithAngle pos) {
-        if (isOnMainThread()) {
-            nativeSetSpawnScreenLocation(pos.x, pos.y, pos.z, pos.yawAngle);
-        } else {
-            mainThread(() -> {
-                nativeSetSpawnScreenLocation(pos.x, pos.y, pos.z, pos.yawAngle);
-            });
-        }
-        return this;
-    }
-
+    
     private native Vehicle nativeGetVehicle(int id);
 
     public Vehicle getVehicle(int id) {
@@ -469,6 +471,19 @@ public class Server {
         return null;
     }
 
+    private native int nativeSpawnObject(int modelId, double x, double y, double z, double yaw, double pitch, double roll, boolean withCollision, boolean damageable);
+
+    public GameObject spawnObject(ObjectSpawnProps props) {
+        if (threadIsValid()) {
+            Integer id = nativeSpawnObject(props.getModelId(), props.getTransform().position.x, props.getTransform().position.y, props.getTransform().position.z, props.getTransform().rotation.yaw, props.getTransform().rotation.pitch, props.getTransform().rotation.roll, props.isCollisionEnabled(), props.isDamageable());
+            if (id > 0) {
+                GameObject o = getObject(id);
+                return o;
+            }
+        }
+        return null;
+    }
+
     private native int nativeSpawnZone(int type, double x, double y, double z, double yaw, double pitch, double roll, double sizeX, double sizeY, double height, int color);
 
     public Zone spawnZone(ZoneSpawnProps spawnProps) {
@@ -481,19 +496,6 @@ public class Server {
                 Zone z = nativeGetZone(id);
                 z.zoneType = spawnProps.getType();
                 return z;
-            }
-        }
-        return null;
-    }
-
-    private native int nativeSpawnObject(int modelId, double x, double y, double z, double yaw, double pitch, double roll, boolean withCollision, boolean damageable);
-
-    public GameObject spawnObject(ObjectSpawnProps props) {
-        if (threadIsValid()) {
-            Integer id = nativeSpawnObject(props.getModelId(), props.getTransform().position.x, props.getTransform().position.y, props.getTransform().position.z, props.getTransform().rotation.yaw, props.getTransform().rotation.pitch, props.getTransform().rotation.roll, props.isCollisionEnabled(), props.isDamageable());
-            if (id > 0) {
-                GameObject o = getObject(id);
-                return o;
             }
         }
         return null;
@@ -540,6 +542,15 @@ public class Server {
         return this;
     }
 
+    public List<GameTimer> getAllTimers() {
+        return Collections.unmodifiableList(InternalServerEvents.timers);
+
+    }
+
+    public GameTimer getTimer(String name) {
+        return InternalServerEvents.timers.stream().filter(t -> t.getName().equals(name)).findFirst().orElse(null);
+    }
+
     public GameTimer createTimer(String name, long interval, boolean recurring, Consumer<GameTimer> r) {
         if (threadIsValid()) {
             if (InternalServerEvents.timers.stream().anyMatch(t -> t.getName().equalsIgnoreCase(name))) {
@@ -555,15 +566,6 @@ public class Server {
         } else {
             return null;
         }
-    }
-
-    public List<GameTimer> getAllTimers() {
-        return Collections.unmodifiableList(InternalServerEvents.timers);
-
-    }
-
-    public GameTimer getTimer(String name) {
-        return InternalServerEvents.timers.stream().filter(t -> t.getName().equals(name)).findFirst().orElse(null);
     }
 
     public GameTimer createTimer(long interval, boolean recurring, Consumer<GameTimer> r) {

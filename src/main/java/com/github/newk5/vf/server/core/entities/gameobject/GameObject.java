@@ -1,7 +1,7 @@
 package com.github.newk5.vf.server.core.entities.gameobject;
 
-import com.github.newk5.vf.server.core.entities.AttachResult;
 import com.github.newk5.vf.server.core.InternalServerEvents;
+import com.github.newk5.vf.server.core.entities.AttachResult;
 import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.GameEntityType;
 import com.github.newk5.vf.server.core.entities.Rotation;
@@ -28,7 +28,6 @@ public class GameObject extends DamageableEntity {
         super();
         this.id = id;
         this.type = GameEntityType.OBJECT;
-
     }
 
     private native boolean nativeIsOverlapping(int id, int entityType, int entityId);

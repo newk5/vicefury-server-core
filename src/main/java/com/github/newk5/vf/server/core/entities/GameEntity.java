@@ -12,18 +12,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-
 import java.util.Map;
 import java.util.Objects;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class GameEntity {
 
-    private Map<String, Object> data = new ConcurrentHashMap<>();
     private long threadId;
     public GameEntityType type;
     protected int id;
     private GameData gameData;
+    private Map<String, Object> data;
     private List<String> tags;
 
     public GameEntity() {
@@ -129,6 +129,77 @@ public abstract class GameEntity {
         return InternalServerEvents.isValid(this);
     }
 
+    public int getId() {
+        return this.id;
+    }
+
+    public GameData getGameData() {
+        return this.gameData;
+    }
+
+    public <T> T getCastedGameData() {
+        return (T) this.gameData;
+    }
+
+    public GameEntity setGameData(GameData gameData) {
+        this.gameData = gameData;
+        return this;
+    }
+
+    public Map<String, Object> getData() {
+        if (this.data == null) {
+            this.data = new ConcurrentHashMap<>();
+        }
+        return this.data;
+    }
+
+    public <T> T getData(String key) {
+        if (this.data != null) {
+            return (T) this.data.get(key);
+        }
+        return null;
+    }
+
+    public GameEntity putData(String key, Object value) {
+        if (this.data == null) {
+            this.data = new ConcurrentHashMap<>();
+        }
+        this.data.put(key, value);
+        return this;
+    }
+
+    public GameEntity removeData(String key) {
+        if (this.data != null) {
+            this.data.remove(key);
+        }
+        return this;
+    }
+
+    public GameEntity clearData() {
+        if (this.data != null) {
+            data.clear();
+        }
+        return this;
+    }
+
+    public boolean hasData(String key) {
+        if (this.data != null) {
+            return this.data.containsKey(key);
+        }
+        return false;
+    }
+
+    public boolean hasNonNullData(String key) {
+        return this.getData(key) != null;
+    }
+
+    public GameEntity clearTags() {
+        if (this.tags != null) {
+            this.tags.clear();
+        }
+        return this;
+    }
+
     public Player asPlayer() {
         return (Player) this;
     }
@@ -159,53 +230,6 @@ public abstract class GameEntity {
             return obj.getPosition();
         }
         return null;
-    }
-
-    public GameData getGameData() {
-        return gameData;
-    }
-
-    public void setGameData(GameData gameData) {
-        this.gameData = gameData;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public GameEntity putData(String key, Object v) {
-        data.put(key, v);
-        return this;
-    }
-
-    public void clearData() {
-        data.clear();
-    }
-
-    public <T> T getData(String key) {
-        return (T) data.get(key);
-    }
-
-    public <T> T getCastedGameData() {
-        return (T) gameData;
-    }
-
-    public GameEntity removeData(String key) {
-        data.remove(key);
-        return this;
-    }
-
-    public boolean hasData(String key) {
-        return data.containsKey(key);
-    }
-
-    public boolean hasNonNullData(String key) {
-        Object v = getData(key);
-        return v != null;
-    }
-
-    public Map<String, Object> getData() {
-        return data;
     }
 
     @Override

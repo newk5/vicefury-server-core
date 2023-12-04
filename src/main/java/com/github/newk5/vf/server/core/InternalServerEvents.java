@@ -4,7 +4,6 @@ import com.github.newk5.vf.server.core.controllers.BaseEventController;
 import com.github.newk5.vf.server.core.controllers.ClientChannelController;
 import com.github.newk5.vf.server.core.controllers.NPCController;
 import com.github.newk5.vf.server.core.entities.GameEntity;
-import com.github.newk5.vf.server.core.entities.GameEntityType;
 import com.github.newk5.vf.server.core.entities.Vector;
 import com.github.newk5.vf.server.core.entities.Weapon;
 import com.github.newk5.vf.server.core.entities.gameobject.GameObject;
@@ -28,51 +27,35 @@ import java.util.stream.Collectors;
 
 public class InternalServerEvents {
 
+    public static Server server;
     protected Map<String, BaseEventController> eventHandlers = new LinkedHashMap<>();
     public static Map<String, ClientChannelController> channelControllers = new HashMap<>();
-    private static DamageEvent damageEvent = new DamageEvent();
-    public static Server server;
     protected static List<Player> allPlayers = new ArrayList<>();
+    protected static List<NPC> allNpcs = new ArrayList<>();
     protected static List<Vehicle> allVehicles = new ArrayList<>();
     protected static List<GameObject> allObjects = new ArrayList<>();
     protected static List<Zone> allZones = new ArrayList<>();
-    protected static List<NPC> allNpcs = new ArrayList<>();
     protected static final Queue<Runnable> queue = new ConcurrentLinkedQueue<>();
     protected static List<GameTimer> timers = new ArrayList<>();
     public static Consumer<Exception> onException;
+    private static DamageEvent damageEvent = new DamageEvent();
     private Vector cachedNPCNoiseVector = new Vector();
 
     public InternalServerEvents() {
     }
 
     protected void clearData() {
-
         eventHandlers.clear();
         channelControllers.clear();
         allPlayers.clear();
-        allVehicles.clear();
         allNpcs.clear();
+        allVehicles.clear();
+        allObjects.clear();
+        allZones.clear();
         queue.clear();
         timers.clear();
-        allZones.clear();
         onException = null;
         server = null;
-    }
-
-    public static boolean isValid(GameEntity e) {
-        if (e instanceof Player) {
-            return allPlayers.stream().anyMatch(p -> p.getId() == e.getId());
-        } else if (e instanceof Vehicle) {
-            return allVehicles.stream().anyMatch(v -> v.getId() == e.getId());
-        } else if (e instanceof NPC) {
-            return allNpcs.stream().anyMatch(n -> n.getId() == e.getId());
-        } else if (e instanceof GameObject) {
-            return allObjects.stream().anyMatch(o -> o.getId() == e.getId());
-        } else if (e instanceof Zone) {
-            return allZones.stream().anyMatch(o -> o.getId() == e.getId());
-        }
-
-        return true;
     }
 
     public void addEventHandler(String name, BaseEventController baseEvents) {
@@ -85,24 +68,11 @@ public class InternalServerEvents {
         }
     }
 
-    public void onLowTPS(int limit, int current) {
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onLowTPS(limit, current);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-    }
-
     public BaseEventController getEventHandler(String name) {
         return eventHandlers.get(name);
     }
 
     public void sortEventHandlers() {
-
         List<BaseEventController> sorted = eventHandlers.values()
                 .stream()
                 .sorted(Comparator.comparing(BaseEventController::getPosition))
@@ -121,6 +91,21 @@ public class InternalServerEvents {
         if (onException != null) {
             onException.accept(e);
         }
+    }
+
+    public static boolean isValid(GameEntity e) {
+        if (e instanceof Player) {
+            return allPlayers.stream().anyMatch(p -> p.getId() == e.getId());
+        } else if (e instanceof NPC) {
+            return allNpcs.stream().anyMatch(n -> n.getId() == e.getId());
+        } else if (e instanceof Vehicle) {
+            return allVehicles.stream().anyMatch(v -> v.getId() == e.getId());
+        } else if (e instanceof GameObject) {
+            return allObjects.stream().anyMatch(o -> o.getId() == e.getId());
+        } else if (e instanceof Zone) {
+            return allZones.stream().anyMatch(o -> o.getId() == e.getId());
+        }
+        return true;
     }
 
     private void clearGameEntityData(GameEntity e) {
@@ -468,20 +453,6 @@ public class InternalServerEvents {
         }
     }
 
-    public void onZoneDestroyed(Zone zone) {
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onZoneDestroyed(zone);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        clearGameEntityData(zone);
-        allZones.remove(zone);
-    }
-
     private void processTimers() {
         if (timers.isEmpty()) {
             return;
@@ -524,8 +495,20 @@ public class InternalServerEvents {
         Events.emit(EventName.onTick);
     }
 
-    public void onServerStart() {
+    public void onLowTPS(int limit, int current) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onLowTPS(limit, current);
+                }
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onLowTPS, limit, current);
+    }
 
+    public void onServerStart() {
         eventHandlers.forEach((name, handler) -> {
             try {
                 if (!handler.isDisabled()) {
@@ -568,7 +551,6 @@ public class InternalServerEvents {
     }
 
     public void onPlayerLeave(Player player) {
-
         eventHandlers.forEach((name, handler) -> {
             try {
                 if (!handler.isDisabled()) {
@@ -579,6 +561,7 @@ public class InternalServerEvents {
             }
         });
         Events.emit(EventName.onPlayerLeave, player);
+
         clearGameEntityData(player);
         allPlayers.remove(player);
     }
@@ -601,7 +584,6 @@ public class InternalServerEvents {
         if (value != null) {
             return value;
         }
-
         return true;
     }
 
@@ -664,7 +646,6 @@ public class InternalServerEvents {
         if (value != null) {
             return value;
         }
-
         return true;
     }
 
@@ -729,7 +710,6 @@ public class InternalServerEvents {
         if (newValue != null) {
             return newValue;
         }
-
         return damageEvent.getDamageToApply();
     }
 
@@ -1118,7 +1098,6 @@ public class InternalServerEvents {
         if (newValue != null) {
             return newValue;
         }
-
         return damageEvent.getDamageToApply();
     }
 
@@ -1168,34 +1147,6 @@ public class InternalServerEvents {
 
     }
 
-    public void onZoneEnter(Zone zone, int entityType, int entityId) {
-        GameEntity entity = server.getGameEntity(entityType, entityId);
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onZoneEnter(zone, entity);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-
-    }
-
-    public void onZoneLeave(Zone zone, int entityType, int entityId) {
-        GameEntity entity = server.getGameEntity(entityType, entityId);
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onZoneLeave(zone, entity);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-
-    }
-
     public void onObjectBroken(GameObject obj) {
         eventHandlers.forEach((name, handler) -> {
             try {
@@ -1207,5 +1158,65 @@ public class InternalServerEvents {
             }
         });
         Events.emit(EventName.onObjectBroken, obj);
+    }
+
+    public void onZoneCreated(Zone zone) {
+        allZones.add(zone);
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onZoneCreated(zone);
+                }
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onZoneCreated, zone);
+    }
+
+    public void onZoneDestroyed(Zone zone) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onZoneDestroyed(zone);
+                }
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onZoneDestroyed, zone);
+
+        clearGameEntityData(zone);
+        allZones.remove(zone);
+    }
+
+    public void onZoneEnter(Zone zone, int entityType, int entityId) {
+        GameEntity entity = server.getGameEntity(entityType, entityId);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onZoneEnter(zone, entity);
+                }
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onZoneEnter, zone, entity);
+    }
+
+    public void onZoneLeave(Zone zone, int entityType, int entityId) {
+        GameEntity entity = server.getGameEntity(entityType, entityId);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onZoneLeave(zone, entity);
+                }
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onZoneLeave, entity);
     }
 }
