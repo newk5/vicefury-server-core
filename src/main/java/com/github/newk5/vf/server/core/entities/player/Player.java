@@ -24,7 +24,6 @@ public class Player extends DamageableEntity {
         this.type = GameEntityType.PLAYER;
     }
 
-
     public boolean isAuthenticated() {
         return this.authenticated;
     }
@@ -41,6 +40,11 @@ public class Player extends DamageableEntity {
 
     public Player sendChatMessage(int color, String message, Object... args) {
         InternalServerEvents.server.sendChatMessage(this.id, color, message, args);
+        return this;
+    }
+
+    public Player sendChatMessage(String message) {
+        InternalServerEvents.server.sendChatMessage(this.id, message);
         return this;
     }
 
@@ -136,10 +140,10 @@ public class Player extends DamageableEntity {
         return weapons;
     }
 
-    private native double nativeGetUpVector(int id);
+    private native Vector nativeGetUpVector(int id);
 
-    public double getUpVector() {
-        return threadIsValid() ? this.nativeGetUpVector(this.id) : -1;
+    public Vector getUpVector() {
+        return threadIsValid() ? this.nativeGetUpVector(this.id) : null;
     }
 
     private native float nativeGetWeaponDamage(int id, int weaponId);
