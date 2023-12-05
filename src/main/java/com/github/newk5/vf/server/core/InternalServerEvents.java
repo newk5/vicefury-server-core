@@ -691,13 +691,13 @@ public class InternalServerEvents {
     }
 
     public Float onPlayerReceiveDamage(Player player, DamageEvent damageEvent) {
+        Float returnValue = null;
         for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             if (!entry.getValue().isDisabled()) {
                 try {
                     Float newValue = entry.getValue().onPlayerReceiveDamage(player, damageEvent);
                     if (newValue != null) {
-                        Events.emit(EventName.onPlayerReceiveDamage, player, damageEvent);
-                        return newValue;
+                        returnValue = newValue;
                     }
                 } catch (Exception e) {
                     catchException(e);
@@ -706,9 +706,12 @@ public class InternalServerEvents {
         }
         Float newValue = Events.request(EventName.onPlayerReceiveDamage, player, damageEvent);
         if (newValue != null) {
-            return newValue;
+            returnValue = newValue;
         }
-        return damageEvent.getDamageToApply();
+        if (returnValue == null) {
+            returnValue = damageEvent.getDamageToApply();
+        }
+        return returnValue;
     }
 
     public void onPlayerEnterVehicle(Player player, Vehicle vehicle, boolean asDriver) {
@@ -788,13 +791,13 @@ public class InternalServerEvents {
     }
 
     public Float onVehicleReceiveDamage(Vehicle vehicle, DamageEvent damageEvent) {
+        Float returnValue = null;
         for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             if (!entry.getValue().isDisabled()) {
                 try {
                     Float newValue = entry.getValue().onVehicleReceiveDamage(vehicle, damageEvent);
                     if (newValue != null) {
-                        Events.emit(EventName.onVehicleReceiveDamage, vehicle, damageEvent);
-                        return newValue;
+                        returnValue = newValue;
                     }
                 } catch (Exception e) {
                     catchException(e);
@@ -803,10 +806,14 @@ public class InternalServerEvents {
         }
         Float newValue = Events.request(EventName.onVehicleReceiveDamage, vehicle, damageEvent);
         if (newValue != null) {
-            return newValue;
+            returnValue = newValue;
         }
 
-        return damageEvent.getDamageToApply();
+        if (returnValue == null) {
+            returnValue = damageEvent.getDamageToApply();
+        }
+
+        return returnValue;
     }
 
     public void onNPCCreated(NPC npc, int type) {
@@ -1079,13 +1086,14 @@ public class InternalServerEvents {
     }
 
     public Float onObjectReceiveDamage(GameObject obj, DamageEvent damageEvent) {
+        Float returnValue = null;
         for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             if (!entry.getValue().isDisabled()) {
                 try {
                     Float newValue = entry.getValue().onObjectReceiveDamage(obj, damageEvent);
                     if (newValue != null) {
-                        Events.emit(EventName.onObjectReceiveDamage, obj, damageEvent);
-                        return newValue;
+                        returnValue = newValue;
+
                     }
                 } catch (Exception e) {
                     catchException(e);
@@ -1094,9 +1102,12 @@ public class InternalServerEvents {
         }
         Float newValue = Events.request(EventName.onObjectReceiveDamage, obj, damageEvent);
         if (newValue != null) {
-            return newValue;
+            returnValue = newValue;
         }
-        return damageEvent.getDamageToApply();
+        if (returnValue == null) {
+            returnValue = damageEvent.getDamageToApply();
+        }
+        return returnValue;
     }
 
     public void onObjectTouched(GameObject obj, int entityType, int entityId) {
