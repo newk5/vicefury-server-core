@@ -313,10 +313,8 @@ public class InternalServerEvents {
     }
 
     public void onPlayerWeaponReceived(Player player, int weaponId, boolean Equipped) {
-        Log.info(String.format("%s received %d %s", player + "", weaponId, Equipped + ""));
         Weapon wep = new Weapon(player, weaponId);
         player.getWeapons().add(wep);
-        Log.info("wep received !!");
         eventHandlers.forEach((name, handler) -> {
             try {
                 if (!handler.isDisabled()) {
