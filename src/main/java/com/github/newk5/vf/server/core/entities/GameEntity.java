@@ -42,6 +42,10 @@ public abstract class GameEntity {
         })).orElse(null);
     }
 
+    public GameCharacter asGameCharacter() {
+        return (GameCharacter) this;
+    }
+
     protected boolean isOnMainThread() {
         return (this.threadId == Thread.currentThread().getId());
     }
@@ -211,8 +215,8 @@ public abstract class GameEntity {
     public NPC asNpc() {
         return (NPC) this;
     }
-    
-    public DamageableEntity asDamageableEntity(){
+
+    public DamageableEntity asDamageableEntity() {
         return (DamageableEntity) this;
     }
 
