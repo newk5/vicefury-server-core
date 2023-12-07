@@ -1,6 +1,7 @@
 package com.github.newk5.vf.server.core.events.damage;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
+import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.GameEntityType;
 import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.player.Player;
@@ -55,7 +56,7 @@ public class DamageEvent {
 
     /**
      * Returns the player that caused the damage. Attention: if a player is hit
-     * by someone driving a vehicle, this will return the driver. 
+     * by someone driving a vehicle, this will return the driver.
      *
      * @return
      */
@@ -80,8 +81,18 @@ public class DamageEvent {
         return null;
     }
 
+    public GameEntity getAttacker() {
+        if (wasDamagedByNPC()) {
+            return getNPCAttacker();
+        } else if (wasDamagedByPlayer()) {
+            return getPlayerAttacker();
+        }
+        return null;
+
+    }
+
     public boolean wasDamagedByWeapon() {
-        return wasDamagedByPlayer() && source == DamageSource.WEAPON;
+        return source == DamageSource.WEAPON;
     }
 
     public void setSource(DamageSource source) {

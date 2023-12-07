@@ -5,7 +5,7 @@ import com.github.newk5.vf.server.core.entities.npc.NPC;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
 
-public class DamageableEntity extends GameEntity {
+public abstract class DamageableEntity extends GameEntity {
 
     public DamageableEntity() {
     }

@@ -2,6 +2,7 @@ package com.github.newk5.vf.server.core.entities.player;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
 import com.github.newk5.vf.server.core.entities.DamageableEntity;
+import com.github.newk5.vf.server.core.entities.GameCharacter;
 import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.GameEntityType;
 import com.github.newk5.vf.server.core.entities.Vector;
@@ -12,7 +13,7 @@ import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Player extends DamageableEntity {
+public class Player extends GameCharacter {
 
     private List<Weapon> weapons;
 

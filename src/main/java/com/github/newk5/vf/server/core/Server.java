@@ -325,6 +325,10 @@ public class Server {
         return this.sendChatMessage(-1, message, args);
     }
 
+    public Server sendChatMessage(String message) {
+        return this.sendChatMessage(-1, message);
+    }
+
     public Server sendChatMessage(int color, String message, Object... args) {
         String msg = CoreUtils.format(message, args);
 
@@ -394,7 +398,7 @@ public class Server {
         }
         return null;
     }
-    
+
     private native Vehicle nativeGetVehicle(int id);
 
     public Vehicle getVehicle(int id) {

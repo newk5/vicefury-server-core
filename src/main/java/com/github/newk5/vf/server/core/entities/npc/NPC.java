@@ -3,6 +3,7 @@ package com.github.newk5.vf.server.core.entities.npc;
 import com.github.newk5.vf.server.core.InternalServerEvents;
 import com.github.newk5.vf.server.core.controllers.NPCController;
 import com.github.newk5.vf.server.core.entities.DamageableEntity;
+import com.github.newk5.vf.server.core.entities.GameCharacter;
 import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.GameEntityType;
 import com.github.newk5.vf.server.core.entities.Vector;
@@ -14,7 +15,7 @@ import com.github.newk5.vf.server.core.utils.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NPC extends DamageableEntity {
+public class NPC extends GameCharacter {
 
     public NPCType NPCType;
     private Class controllerClass;

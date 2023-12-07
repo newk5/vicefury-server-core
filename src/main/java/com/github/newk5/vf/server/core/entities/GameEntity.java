@@ -211,6 +211,10 @@ public abstract class GameEntity {
     public NPC asNpc() {
         return (NPC) this;
     }
+    
+    public DamageableEntity asDamageableEntity(){
+        return (DamageableEntity) this;
+    }
 
     public Vector getPosition() {
         if (this instanceof Player) {
