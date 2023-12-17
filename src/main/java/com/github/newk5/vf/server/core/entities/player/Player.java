@@ -34,6 +34,83 @@ public class Player extends GameCharacter {
         return this;
     }
 
+    private native boolean nativeIsSpectatingPlayer(int id, int playerId);
+
+    public boolean isSpectating(int playerId) {
+        if (threadIsValid()) {
+            return nativeIsSpectatingPlayer(id, playerId);
+        }
+        
+        return false;
+    }
+
+    public boolean isSpectating(Player p) {
+        if (threadIsValid()) {
+            return nativeIsSpectatingPlayer(id, p.id);
+        }
+        return false;
+    }
+
+    private native int nativeGetSpectateTarget(int id);
+
+    public Player getSpectateTarget() {
+        if (threadIsValid()) {
+            int playerId = nativeGetSpectateTarget(id);
+            if (playerId == 0) {
+                return null;
+            }
+            return InternalServerEvents.server.getPlayer(playerId);
+        }
+        return null;
+    }
+
+    private native void nativeSpectatePlayer(int id, int targetId);
+
+    public Player spectate(int TargetId) {
+        if (isOnMainThread()) {
+            nativeSpectatePlayer(id, TargetId);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSpectatePlayer(id, TargetId);
+            });
+           
+        }
+        return this;
+    }
+
+    public Player spectate(Player p) {
+        if (isOnMainThread()) {
+            nativeSpectatePlayer(id, p.id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSpectatePlayer(id, p.id);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeStopSpectating(int id);
+
+    public Player stopSpectating() {
+        if (isOnMainThread()) {
+            nativeStopSpectating(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeStopSpectating(id);
+            });
+        }
+        return this;
+    }
+
+    private native boolean nativePlayerIsSpectating(int id);
+
+    public boolean isSpectating() {
+        if (threadIsValid()) {
+            return nativePlayerIsSpectating(id);
+        }
+        return false;
+    }
+
     public Player sendData(String channel, String data) {
         InternalServerEvents.server.sendData(this.id, channel, data);
         return this;
