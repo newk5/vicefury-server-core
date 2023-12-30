@@ -32,6 +32,24 @@ public class NPC extends GameCharacter {
         return this.NPCType;
     }
 
+    private native boolean nativeIsSwimming(int id);
+
+    public boolean isSwimming() {
+        if (threadIsValid()) {
+            return nativeIsSwimming(id);
+        }
+        return false;
+    }
+
+    private native boolean nativeIsUnderwater(int id);
+
+    public boolean isUnderwater() {
+        if (threadIsValid()) {
+            return nativeIsUnderwater(id);
+        }
+        return false;
+    }
+
     public static NPCSpawnProps SpawnProperties() {
         return new NPCSpawnProps();
     }
@@ -1071,6 +1089,10 @@ public class NPC extends GameCharacter {
     }
 
     private native void nativeDestroy(int id);
+
+    public void destroyController() {
+        controller = null;
+    }
 
     public NPC destroy() {
         if (isOnMainThread()) {

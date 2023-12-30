@@ -34,13 +34,31 @@ public class Player extends GameCharacter {
         return this;
     }
 
+    private native boolean nativeIsSwimming(int id);
+
+    public boolean isSwimming() {
+        if (threadIsValid()) {
+            return nativeIsSwimming(id);
+        }
+        return false;
+    }
+
+    private native boolean nativeIsUnderwater(int id);
+
+    public boolean isUnderwater() {
+        if (threadIsValid()) {
+            return nativeIsUnderwater(id);
+        }
+        return false;
+    }
+
     private native boolean nativeIsSpectatingPlayer(int id, int playerId);
 
     public boolean isSpectating(int playerId) {
         if (threadIsValid()) {
             return nativeIsSpectatingPlayer(id, playerId);
         }
-        
+
         return false;
     }
 
@@ -73,7 +91,7 @@ public class Player extends GameCharacter {
             InternalServerEvents.server.mainThread(() -> {
                 nativeSpectatePlayer(id, TargetId);
             });
-           
+
         }
         return this;
     }
@@ -122,12 +140,12 @@ public class Player extends GameCharacter {
     }
 
     public Player sendChatMessage(String message) {
-        InternalServerEvents.server.sendChatMessage(this.id, message);
+        InternalServerEvents.server.sendChatMessage(this.id,0xFFFFFFFF, message);
         return this;
     }
 
     public Player sendChatMessage(String message, Object... args) {
-        InternalServerEvents.server.sendChatMessage(this.id, message, args);
+        InternalServerEvents.server.sendChatMessage(this.id,0xFFFFFFFF, message, args);
         return this;
     }
 

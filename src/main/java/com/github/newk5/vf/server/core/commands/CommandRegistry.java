@@ -133,6 +133,28 @@ public class CommandRegistry {
         return false;
     }
 
+    public CommandInfo getCommandInfo(String cmdName) {
+        Integer index = cmdIndexCache.get(cmdName);
+
+        CommandEntry cmd = index != null ? allCommands.get(index) : null;
+        if (cmd == null) {
+            return null;
+        }
+
+        return new CommandInfo(cmd);
+    }
+
+    public List<CommandInfo> getAllCommandInfo() {
+        List<CommandInfo> cmds = new ArrayList<>();
+
+        allCommands.forEach(cmd -> {
+
+            cmds.add(new CommandInfo(cmd));
+        });
+
+        return cmds;
+    }
+
     private CommandEntry registerMethod(CommandController c, CommandHandler cc, Method m) {
         Command cmdAn = m.getAnnotation(Command.class);
         List<String> aliases = Stream.of(cmdAn.alias()).filter(s -> !s.trim().equals("")).map(String::toLowerCase).collect(Collectors.toList());

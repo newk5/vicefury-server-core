@@ -33,6 +33,22 @@ public abstract class NPCController {
 
     }
 
+    public void onStartedSwimming() {
+
+    }
+
+    public void onStoppedSwimming() {
+
+    }
+
+    public void onDivedUnderwater() {
+
+    }
+
+    public void onReachedWaterSurface() {
+
+    }
+
     public void onDeath(DamageEvent damageEvent) {
 
     }
@@ -108,14 +124,16 @@ public abstract class NPCController {
     public void onFollowTargetLeaveVehicle(GameEntity ent, Vehicle vehicle, boolean asDriver) {
 
     }
-    
+
     public void onFollowTargetReached(GameEntity target) {
 
     }
+
     public void onBeforeAttack(GameEntity target) {
-        
+
     }
-    public void onRanOutOfAmmo(int weapon){
-        
+
+    public void onRanOutOfAmmo(int weapon) {
+
     }
 }

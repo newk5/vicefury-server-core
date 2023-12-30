@@ -38,6 +38,21 @@ public class Server {
         baseServerEvents = internalEvents;
     }
 
+    private native double nativeGetWaterLevel();
+
+    public double getWaterLevel() {
+        return threadIsValid() ? this.nativeGetWaterLevel() : -1;
+    }
+
+    private native void nativeSetWaterLevel(double level);
+
+    public Server setWaterLevel(double level) {
+        if (threadIsValid()) {
+            nativeSetWaterLevel(level);
+        }
+        return this;
+    }
+
     private boolean isOnMainThread() {
         return (this.threadId == Thread.currentThread().getId());
     }
@@ -257,14 +272,11 @@ public class Server {
         return this;
     }
 
-  
-
     public <T> T findClosestTo(List<? extends GameEntity> entities, Vector position) {
         return (T) entities.stream().min(Comparator.comparingDouble(ent -> {
             return position.distanceTo(ent.getPosition());
         })).orElse(null);
     }
-
 
     private native Zone nativeGetZone(int id);
 
@@ -322,11 +334,11 @@ public class Server {
     private native void nativeSendChatMessageToAll(int var1, String var2);
 
     public Server sendChatMessage(String message, Object... args) {
-        return this.sendChatMessage(-1, message, args);
+        return this.sendChatMessage(0xFFFFFFFF, message, args);
     }
 
     public Server sendChatMessage(String message) {
-        return this.sendChatMessage(-1, message);
+        return this.sendChatMessage(0xFFFFFFFF, message);
     }
 
     public Server sendChatMessage(int color, String message, Object... args) {
@@ -345,7 +357,7 @@ public class Server {
     private native void nativeSendChatMessageToPlayer(int var1, int var2, String var3);
 
     public Server sendChatMessage(Player player, String message, Object... args) {
-        return this.sendChatMessage(player.getId(), -1, message, args);
+        return this.sendChatMessage(player.getId(), 0xFFFFFFFF, message, args);
     }
 
     public Server sendChatMessage(Player player, int color, String message, Object... args) {

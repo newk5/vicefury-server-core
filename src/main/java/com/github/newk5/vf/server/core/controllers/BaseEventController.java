@@ -75,6 +75,38 @@ public abstract class BaseEventController {
 
     }
 
+    public void onPlayerStartedSwimming(Player player) {
+
+    }
+
+    public void onPlayerStoppedSwimming(Player player) {
+
+    }
+
+    public void onPlayerDivedUnderwater(Player player) {
+
+    }
+
+    public void onPlayerReachedWaterSurface(Player player) {
+
+    }
+
+    public void onNPCStartedSwimming(NPC npc) {
+
+    }
+
+    public void onNPCStoppedSwimming(NPC npc) {
+
+    }
+
+    public void onNPCDivedUnderwater(NPC npc) {
+
+    }
+
+    public void onNPCReachedWaterSurface(NPC npc) {
+
+    }
+
     public Boolean onPlayerRequestSpawn(Player player) {
         return null;
     }
