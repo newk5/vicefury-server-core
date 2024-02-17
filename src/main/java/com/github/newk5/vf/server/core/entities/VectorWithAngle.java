@@ -30,6 +30,10 @@ public class VectorWithAngle {
         this.yawAngle = yawAngle;
     }
 
+    public VectorWithAngle createCopy() {
+        return new VectorWithAngle(x, y, z, yawAngle);
+    }
+
     public Double distanceTo(Vector v2) {
         return Math.sqrt((v2.x - x) * (v2.x - x) + (v2.y - y) * (v2.y - y) + (v2.z - z) * (v2.z - z));
     }
