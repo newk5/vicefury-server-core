@@ -124,460 +124,6 @@ public class InternalServerEvents {
         }
     }
 
-    public void onNPCEnemyDied(NPC npc, int entityType, int entityID) {
-        GameEntity entity = server.getGameEntity(entityType, entityID);
-        NPCController c = npc.getController();
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcEnemyDied(npc, entity);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        if (c != null) {
-            c.onEnemyDied(entity);
-        }
-
-    }
-
-    public void onNPCStartedSwimming(NPC npc) {
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNPCStartedSwimming(npc);
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-        NPCController c = npc.getController();
-        if (c != null) {
-            c.onStartedSwimming();
-        }
-    }
-
-    public void onNPCStoppedSwimming(NPC npc) {
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNPCStoppedSwimming(npc);
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-        NPCController c = npc.getController();
-        if (c != null) {
-            c.onStoppedSwimming();
-        }
-    }
-
-    public void onNPCDivedUnderwater(NPC npc) {
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNPCDivedUnderwater(npc);
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-        NPCController c = npc.getController();
-        if (c != null) {
-            c.onDivedUnderwater();
-        }
-    }
-
-    public void onNPCReachedWaterSurface(NPC npc) {
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNPCReachedWaterSurface(npc);
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-
-        NPCController c = npc.getController();
-        if (c != null) {
-            c.onReachedWaterSurface();
-        }
-    }
-
-    public void onPlayerStartedSwimming(Player player) {
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onPlayerStartedSwimming(player);
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-    }
-
-    public void onPlayerStoppedSwimming(Player player) {
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onPlayerStoppedSwimming(player);
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-    }
-
-    public void onPlayerDivedUnderwater(Player player) {
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onPlayerDivedUnderwater(player);
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-    }
-
-    public void onPlayerReachedWaterSurface(Player player) {
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onPlayerReachedWaterSurface(player);
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-
-    }
-
-    public void onNPCEnemyEnterVehicle(NPC npc, int entityType, int entityID, Vehicle vehicle, boolean asDriver) {
-        NPCController c = npc.getController();
-        GameEntity entity = server.getGameEntity(entityType, entityID);
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcEnemyEnterVehicle(npc, entity, vehicle, asDriver);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        if (c != null) {
-            c.onEnemyEnterVehicle(entity, vehicle, asDriver);
-        }
-
-    }
-
-    public void onNPCEnemyLeaveVehicle(NPC npc, int entityType, int entityID, Vehicle vehicle, boolean asDriver) {
-        NPCController c = npc.getController();
-        GameEntity entity = server.getGameEntity(entityType, entityID);
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcEnemyLeaveVehicle(npc, entity, vehicle, asDriver);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        if (c != null) {
-            c.onEnemyLeaveVehicle(entity, vehicle, asDriver);
-        }
-
-    }
-
-    public void onNPCEnemyLeftServer(NPC npc, Player player) {
-        NPCController c = npc.getController();
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcEnemyLeftServer(npc, player);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        if (c != null) {
-            c.onEnemyLeftTheServer(player);
-        }
-    }
-
-    public void onNPCFollowTargetDied(NPC npc, int entityType, int entityID) {
-        GameEntity entity = server.getGameEntity(entityType, entityID);
-        NPCController c = npc.getController();
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcFollowTargetDied(npc, entity);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        if (c != null) {
-            c.onFollowTargetDied(entity);
-        }
-
-    }
-
-    public void onNPCFollowTargetEnterVehicle(NPC npc, int entityType, int entityID, Vehicle vehicle, boolean asDriver) {
-        NPCController c = npc.getController();
-        GameEntity entity = server.getGameEntity(entityType, entityID);
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcFollowTargetEnterVehicle(npc, entity, vehicle, asDriver);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        if (c != null) {
-            c.onFollowTargetEnterVehicle(entity, vehicle, asDriver);
-        }
-
-    }
-
-    public void onNPCFollowTargetLeaveVehicle(NPC npc, int entityType, int entityID, Vehicle vehicle, boolean asDriver) {
-        NPCController c = npc.getController();
-        GameEntity entity = server.getGameEntity(entityType, entityID);
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcFollowTargetLeaveVehicle(npc, entity, vehicle, asDriver);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        if (c != null) {
-            c.onFollowTargetLeaveVehicle(entity, vehicle, asDriver);
-        }
-
-    }
-
-    public void onNPCFollowTargetLeftServer(NPC npc, Player player) {
-        NPCController c = npc.getController();
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcFollowTargetLeftServer(npc, player);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        if (c != null) {
-            c.onFollowTargetLeftTheServer(player);
-        }
-    }
-
-    public void onNPCRanOutOfAmmo(NPC npc, int weapon) {
-        NPCController c = npc.getController();
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcRanOutOfAmmo(npc, weapon);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        if (c != null) {
-            c.onRanOutOfAmmo(weapon);
-        }
-
-    }
-
-    public void onNPCIsAboutToAttack(NPC npc, int entityType, int entityID) {
-        NPCController c = npc.getController();
-
-        GameEntity entity = server.getGameEntity(entityType, entityID);
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcIsAboutToAttack(npc, entity);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-
-        if (c != null) {
-            c.onBeforeAttack(entity);
-        }
-
-    }
-
-    public void onZoneCreated(Zone zone, int type) {
-        zone.zoneType = ZoneType.value(type);
-        allZones.add(zone);
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onZoneCreated(zone);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-    }
-
-    public void onPlayerWeaponReceived(Player player, int weaponId, boolean Equipped) {
-        Weapon wep = new Weapon(player, weaponId);
-        player.getWeapons().add(wep);
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onPlayerWeaponReceived(player, wep, Equipped);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-
-    }
-
-    public void onPlayerWeaponRemoved(Player player, int weaponId, boolean Equipped) {
-        Weapon wep = player.getWeapon(weaponId);
-        player.getWeapons().removeIf(w -> w.getWeaponId() == weaponId);
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onPlayerWeaponRemoved(player, wep, Equipped);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-
-    }
-
-    public void onNPCEnterVehicle(NPC npc, Vehicle vehicle) {
-        NPCController c = npc.getController();
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcEnterVehicle(npc, vehicle);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-
-        if (c != null) {
-            c.onEnterVehicle(vehicle);
-        }
-    }
-
-    public void onNPCLeaveVehicle(NPC npc, Vehicle vehicle) {
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcLeaveVehicle(npc, vehicle);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        NPCController c = npc.getController();
-        if (c != null) {
-            c.onLeaveVehicle(vehicle);
-        }
-
-    }
-
-    public void onNPCReachedLocation(NPC npc, String location) {
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcReachedLocation(npc, location);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-
-        NPCController c = npc.getController();
-        if (c != null) {
-            c.onLocationReached(location);
-        }
-    }
-
-    public void onNPCWeaponReceived(NPC npc, int weaponId, boolean Equipped) {
-        Weapon wep = new Weapon(npc, weaponId);
-        npc.getWeapons().add(wep);
-        NPCController c = npc.getController();
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcWeaponReceived(npc, wep, Equipped);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        if (c != null) {
-            c.onWeaponReceived(wep, Equipped);
-        }
-
-    }
-
-    public void onNPCWeaponRemoved(NPC npc, int weaponId, boolean Equipped) {
-        Weapon wep = npc.getWeapon(weaponId);
-        npc.getWeapons().removeIf(w -> w.getWeaponId() == weaponId);
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcWeaponRemoved(npc, wep, Equipped);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        NPCController c = npc.getController();
-        if (c != null) {
-            c.onWeaponRemoved(wep, Equipped);
-        }
-    }
-
-    public void onNPCReachedFollowTarget(NPC npc, int entityType, int entityID) {
-        NPCController c = npc.getController();
-        GameEntity entity = server.getGameEntity(entityType, entityID);
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcReachedFollowTarget(npc, entity);
-                }
-            } catch (Exception e) {
-                catchException(e);
-            }
-        });
-        if (c != null) {
-            c.onFollowTargetReached(entity);
-        }
-    }
-
     private void processTimers() {
         if (timers.isEmpty()) {
             return;
@@ -626,7 +172,7 @@ public class InternalServerEvents {
                 if (!handler.isDisabled()) {
                     handler.onLowTPS(limit, current);
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         });
@@ -867,6 +413,90 @@ public class InternalServerEvents {
         Events.emit(EventName.onPlayerLeaveVehicle, player, vehicle, asDriver);
     }
 
+    public void onPlayerWeaponReceived(Player player, int weaponId, boolean isEquipped) {
+        Weapon weapon = new Weapon(player, weaponId);
+
+        player.getWeapons().add(weapon);
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onPlayerWeaponReceived(player, weapon, isEquipped);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onPlayerWeaponReceived, player, weapon, isEquipped);
+    }
+
+    public void onPlayerWeaponRemoved(Player player, int weaponId, boolean isEquipped) {
+        Weapon weapon = player.getWeapon(weaponId);
+
+        player.getWeapons().removeIf(w -> w.getWeaponId() == weaponId);
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onPlayerWeaponRemoved(player, weapon, isEquipped);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onPlayerWeaponRemoved, player, weapon, isEquipped);
+    }
+
+    public void onPlayerStartedSwimming(Player player) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onPlayerStartedSwimming(player);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onPlayerStartedSwimming, player);
+    }
+
+    public void onPlayerStoppedSwimming(Player player) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onPlayerStoppedSwimming(player);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onPlayerStoppedSwimming, player);
+    }
+
+    public void onPlayerDivedUnderwater(Player player) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onPlayerDivedUnderwater(player);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onPlayerDivedUnderwater, player);
+    }
+
+    public void onPlayerReachedWaterSurface(Player player) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onPlayerReachedWaterSurface(player);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onPlayerReachedWaterSurface, player);
+    }
+
     public void onVehicleCreated(Vehicle vehicle) {
         allVehicles.add(vehicle);
 
@@ -939,15 +569,12 @@ public class InternalServerEvents {
         if (returnValue == null) {
             returnValue = damageEvent.getDamageToApply();
         }
-
         return returnValue;
     }
 
     public void onNPCCreated(NPC npc, int type) {
         npc.NPCType = NPCType.value(type);
         allNpcs.add(npc);
-
-        NPCController c = npc.getController();
 
         eventHandlers.forEach((name, handler) -> {
             try {
@@ -959,14 +586,14 @@ public class InternalServerEvents {
             }
         });
         Events.emit(EventName.onNpcCreated, npc);
+
+        NPCController c = npc.getController();
         if (c != null) {
             c.onCreated();
         }
     }
 
     public void onNPCDestroyed(NPC npc) {
-        NPCController c = npc.getController();
-
         eventHandlers.forEach((name, handler) -> {
             try {
                 if (!handler.isDisabled()) {
@@ -977,6 +604,8 @@ public class InternalServerEvents {
             }
         });
         Events.emit(EventName.onNpcDestroy, npc);
+
+        NPCController c = npc.getController();
         if (c != null) {
             c.onDestroy();
         }
@@ -985,8 +614,6 @@ public class InternalServerEvents {
     }
 
     public void onNPCSpawned(NPC npc) {
-        NPCController c = npc.getController();
-
         eventHandlers.forEach((name, handler) -> {
             try {
                 if (!handler.isDisabled()) {
@@ -997,6 +624,8 @@ public class InternalServerEvents {
             }
         });
         Events.emit(EventName.onNpcSpawned, npc);
+
+        NPCController c = npc.getController();
         if (c != null) {
             c.onSpawned();
         }
@@ -1009,8 +638,6 @@ public class InternalServerEvents {
     }
 
     public void onNpcDied(NPC npc, DamageEvent damageEvent) {
-        NPCController c = npc.getController();
-
         eventHandlers.forEach((name, handler) -> {
             try {
                 if (!handler.isDisabled()) {
@@ -1021,6 +648,8 @@ public class InternalServerEvents {
             }
         });
         Events.emit(EventName.onNpcDied, npc, damageEvent);
+
+        NPCController c = npc.getController();
         if (c != null) {
             c.onDeath(damageEvent);
         }
@@ -1033,9 +662,7 @@ public class InternalServerEvents {
     }
 
     public Float onNpcReceiveDamage(NPC npc, DamageEvent damageEvent) {
-        NPCController c = npc.getController();
         Float returnValue = null;
-
         //order:
         //1 - Handlers
         //2 - Events. signal
@@ -1045,23 +672,23 @@ public class InternalServerEvents {
         for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             if (!entry.getValue().isDisabled()) {
                 try {
-                    Float handlerValue = entry.getValue().onNpcReceiveDamage(npc, damageEvent);
-                    if (handlerValue != null) {
-                        returnValue = handlerValue;
+                    Float newValue = entry.getValue().onNpcReceiveDamage(npc, damageEvent);
+                    if (newValue != null) {
+                        returnValue = newValue;
                     }
-
                 } catch (Exception e) {
                     catchException(e);
                 }
             }
         }
         //2 - Events signal
-        Float eventsReturnValue = Events.request(EventName.onNpcReceiveDamage, npc, damageEvent);
-        if (eventsReturnValue != null) {
-            returnValue = eventsReturnValue;
+        Float value = Events.request(EventName.onNpcReceiveDamage, npc, damageEvent);
+        if (value != null) {
+            returnValue = value;
         }
 
         //3 - NPC Controller
+        NPCController c = npc.getController();
         if (c != null) {
             Float newValue = c.onReceiveDamage(damageEvent);
             if (newValue != null) {
@@ -1074,13 +701,127 @@ public class InternalServerEvents {
         return damageEvent.getDamageToApply();
     }
 
+    public void onNPCEnterVehicle(NPC npc, Vehicle vehicle) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcEnterVehicle(npc, vehicle);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcEnterVehicle, npc, vehicle);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onEnterVehicle(vehicle);
+        }
+    }
+
+    public void onNPCLeaveVehicle(NPC npc, Vehicle vehicle) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcLeaveVehicle(npc, vehicle);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcLeaveVehicle, npc, vehicle);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onLeaveVehicle(vehicle);
+        }
+    }
+
+    public void onNPCWeaponReceived(NPC npc, int weaponId, boolean isEquipped) {
+        Weapon weapon = new Weapon(npc, weaponId);
+        npc.getWeapons().add(weapon);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcWeaponReceived(npc, weapon, isEquipped);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcWeaponReceived, npc, weapon, isEquipped);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onWeaponReceived(weapon, isEquipped);
+        }
+    }
+
+    public void onNPCWeaponRemoved(NPC npc, int weaponId, boolean isEquipped) {
+        Weapon weapon = npc.getWeapon(weaponId);
+        npc.getWeapons().removeIf(w -> w.getWeaponId() == weaponId);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcWeaponRemoved(npc, weapon, isEquipped);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcWeaponRemoved, npc, weapon, isEquipped);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onWeaponRemoved(weapon, isEquipped);
+        }
+    }
+
+    public void onNPCRanOutOfAmmo(NPC npc, int weapon) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcRanOutOfAmmo(npc, weapon);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcRanOutOfAmmo, npc, weapon);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onRanOutOfAmmo(weapon);
+        }
+    }
+
+    public void onNPCIsAboutToAttack(NPC npc, int entityType, int entityID) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcIsAboutToAttack(npc, entity);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcIsAboutToAttack, npc, entity);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onBeforeAttack(entity);
+        }
+    }
+
     public void onNPCActionChanged(NPC npc, int oldAction, int newAction) {
         onNpcActionChanged(npc, NPCAction.value(oldAction), NPCAction.value(newAction));
     }
 
     public void onNpcActionChanged(NPC npc, NPCAction oldAction, NPCAction newAction) {
-        NPCController c = npc.getController();
-
         eventHandlers.forEach((name, handler) -> {
             try {
                 if (!handler.isDisabled()) {
@@ -1091,6 +832,8 @@ public class InternalServerEvents {
             }
         });
         Events.emit(EventName.onNpcActionChanged, npc, oldAction, newAction);
+
+        NPCController c = npc.getController();
         if (c != null) {
             c.onActionChanged(oldAction, newAction);
         }
@@ -1102,12 +845,9 @@ public class InternalServerEvents {
         if (entity != null) {
             onNpcGainedSightOf(npc, entity);
         }
-
     }
 
     public void onNpcGainedSightOf(NPC npc, GameEntity entity) {
-        NPCController c = npc.getController();
-
         for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             if (!entry.getValue().isDisabled()) {
                 try {
@@ -1118,8 +858,9 @@ public class InternalServerEvents {
                 }
             }
         }
-        Events.request(EventName.onNpcGainedSightOf, npc, entity);
+        Events.emit(EventName.onNpcGainedSightOf, npc, entity);
 
+        NPCController c = npc.getController();
         if (c != null) {
             c.onGainedSightOf(entity);
         }
@@ -1134,8 +875,6 @@ public class InternalServerEvents {
     }
 
     public void onNpcLostSightOf(NPC npc, GameEntity entity) {
-        NPCController c = npc.getController();
-
         for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             if (!entry.getValue().isDisabled()) {
                 try {
@@ -1146,8 +885,9 @@ public class InternalServerEvents {
                 }
             }
         }
-        Events.request(EventName.onNpcLostSightOf, npc, entity);
+        Events.emit(EventName.onNpcLostSightOf, npc, entity);
 
+        NPCController c = npc.getController();
         if (c != null) {
             c.onLostSightOf(entity);
         }
@@ -1155,8 +895,6 @@ public class InternalServerEvents {
 
     public void onNPCHeardNoise(NPC npc, double x, double y, double z) {
         cachedNPCNoiseVector.set(x, y, z);
-
-        NPCController c = npc.getController();
 
         for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             if (!entry.getValue().isDisabled()) {
@@ -1168,10 +906,279 @@ public class InternalServerEvents {
                 }
             }
         }
-        Events.request(EventName.onNpcHeardNoise, npc, cachedNPCNoiseVector);
+        Events.emit(EventName.onNpcHeardNoise, npc, cachedNPCNoiseVector);
 
+        NPCController c = npc.getController();
         if (c != null) {
             c.onHeardNoise(cachedNPCNoiseVector);
+        }
+    }
+
+
+    public void onNPCReachedLocation(NPC npc, String location) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcReachedLocation(npc, location);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcReachedLocation, npc, location);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onLocationReached(location);
+        }
+    }
+
+    public void onNPCReachedFollowTarget(NPC npc, int entityType, int entityID) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcReachedFollowTarget(npc, entity);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcReachedFollowTarget, npc, entity);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onFollowTargetReached(entity);
+        }
+    }
+
+    public void onNPCStartedSwimming(NPC npc) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNPCStartedSwimming(npc);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcStartedSwimming, npc);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onStartedSwimming();
+        }
+    }
+
+    public void onNPCStoppedSwimming(NPC npc) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNPCStoppedSwimming(npc);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcStoppedSwimming, npc);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onStoppedSwimming();
+        }
+    }
+
+    public void onNPCDivedUnderwater(NPC npc) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNPCDivedUnderwater(npc);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcDivedUnderwater, npc);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onDivedUnderwater();
+        }
+    }
+
+    public void onNPCReachedWaterSurface(NPC npc) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNPCReachedWaterSurface(npc);
+                }
+            } catch (
+                    Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcReachedWaterSurface, npc);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onReachedWaterSurface();
+        }
+    }
+
+    public void onNPCEnemyDied(NPC npc, int entityType, int entityID) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcEnemyDied(npc, entity);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcEnemyDied, npc, entity);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onEnemyDied(entity);
+        }
+    }
+
+    public void onNPCEnemyEnterVehicle(NPC npc, int entityType, int entityID, Vehicle vehicle, boolean asDriver) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcEnemyEnterVehicle(npc, entity, vehicle, asDriver);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcEnemyEnterVehicle, npc, entity, vehicle, asDriver);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onEnemyEnterVehicle(entity, vehicle, asDriver);
+        }
+    }
+
+    public void onNPCEnemyLeaveVehicle(NPC npc, int entityType, int entityID, Vehicle vehicle, boolean asDriver) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcEnemyLeaveVehicle(npc, entity, vehicle, asDriver);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcEnemyLeaveVehicle, npc, entity, vehicle, asDriver);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onEnemyLeaveVehicle(entity, vehicle, asDriver);
+        }
+    }
+
+    public void onNPCEnemyLeftServer(NPC npc, Player player) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcEnemyLeftServer(npc, player);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcEnemyLeftServer, npc, player);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onEnemyLeftTheServer(player);
+        }
+    }
+
+    public void onNPCFollowTargetDied(NPC npc, int entityType, int entityID) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcFollowTargetDied(npc, entity);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcFollowTargetDied, npc, entity);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onFollowTargetDied(entity);
+        }
+    }
+
+    public void onNPCFollowTargetEnterVehicle(NPC npc, int entityType, int entityID, Vehicle vehicle, boolean asDriver) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcFollowTargetEnterVehicle(npc, entity, vehicle, asDriver);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcFollowTargetEnterVehicle, npc, entity, vehicle, asDriver);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onFollowTargetEnterVehicle(entity, vehicle, asDriver);
+        }
+    }
+
+    public void onNPCFollowTargetLeaveVehicle(NPC npc, int entityType, int entityID, Vehicle vehicle, boolean asDriver) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcFollowTargetLeaveVehicle(npc, entity, vehicle, asDriver);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcFollowTargetLeaveVehicle, npc, entity, vehicle, asDriver);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onFollowTargetLeaveVehicle(entity, vehicle, asDriver);
+        }
+    }
+
+    public void onNPCFollowTargetLeftServer(NPC npc, Player player) {
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcFollowTargetLeftServer(npc, player);
+                }
+            } catch (Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcFollowTargetLeftServer, npc, player);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onFollowTargetLeftTheServer(player);
         }
     }
 
@@ -1254,33 +1261,32 @@ public class InternalServerEvents {
 
     public void onObjectOverlapped(GameObject obj, int entityType, int entityId) {
         GameEntity entity = server.getGameEntity(entityType, entityId);
+
         eventHandlers.forEach((name, handler) -> {
             try {
                 if (!handler.isDisabled()) {
                     handler.onObjectOverlapped(obj, entity);
                 }
-
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         });
-
+        Events.emit(EventName.onObjectOverlapped, obj, entity);
     }
 
     public void onObjectStoppedOverlapping(GameObject obj, int entityType, int entityId) {
-
         GameEntity entity = server.getGameEntity(entityType, entityId);
+
         eventHandlers.forEach((name, handler) -> {
             try {
                 if (!handler.isDisabled()) {
-                    handler.onObjecStoppedOverlapping(obj, entity);
+                    handler.onObjectStoppedOverlapping(obj, entity);
                 }
-
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         });
-
+        Events.emit(EventName.onObjectStoppedOverlapping, obj, entity);
     }
 
     public void onObjectBroken(GameObject obj) {
@@ -1296,14 +1302,16 @@ public class InternalServerEvents {
         Events.emit(EventName.onObjectBroken, obj);
     }
 
-    public void onZoneCreated(Zone zone) {
+    public void onZoneCreated(Zone zone, int type) {
+        zone.zoneType = ZoneType.value(type);
         allZones.add(zone);
+
         eventHandlers.forEach((name, handler) -> {
             try {
                 if (!handler.isDisabled()) {
                     handler.onZoneCreated(zone);
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         });
@@ -1316,7 +1324,7 @@ public class InternalServerEvents {
                 if (!handler.isDisabled()) {
                     handler.onZoneDestroyed(zone);
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         });
@@ -1334,7 +1342,7 @@ public class InternalServerEvents {
                 if (!handler.isDisabled()) {
                     handler.onZoneEnter(zone, entity);
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         });
@@ -1349,10 +1357,10 @@ public class InternalServerEvents {
                 if (!handler.isDisabled()) {
                     handler.onZoneLeave(zone, entity);
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 catchException(e);
             }
         });
-        Events.emit(EventName.onZoneLeave, entity);
+        Events.emit(EventName.onZoneLeave, zone, entity);
     }
 }

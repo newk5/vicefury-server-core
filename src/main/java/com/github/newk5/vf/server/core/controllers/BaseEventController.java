@@ -75,38 +75,6 @@ public abstract class BaseEventController {
 
     }
 
-    public void onPlayerStartedSwimming(Player player) {
-
-    }
-
-    public void onPlayerStoppedSwimming(Player player) {
-
-    }
-
-    public void onPlayerDivedUnderwater(Player player) {
-
-    }
-
-    public void onPlayerReachedWaterSurface(Player player) {
-
-    }
-
-    public void onNPCStartedSwimming(NPC npc) {
-
-    }
-
-    public void onNPCStoppedSwimming(NPC npc) {
-
-    }
-
-    public void onNPCDivedUnderwater(NPC npc) {
-
-    }
-
-    public void onNPCReachedWaterSurface(NPC npc) {
-
-    }
-
     public Boolean onPlayerRequestSpawn(Player player) {
         return null;
     }
@@ -147,6 +115,30 @@ public abstract class BaseEventController {
 
     }
 
+    public void onPlayerWeaponReceived(Player player, Weapon weapon, boolean isEquipped) {
+
+    }
+
+    public void onPlayerWeaponRemoved(Player player, Weapon weapon, boolean isEquipped) {
+
+    }
+
+    public void onPlayerStartedSwimming(Player player) {
+
+    }
+
+    public void onPlayerStoppedSwimming(Player player) {
+
+    }
+
+    public void onPlayerDivedUnderwater(Player player) {
+
+    }
+
+    public void onPlayerReachedWaterSurface(Player player) {
+
+    }
+
     public void onNpcCreated(NPC npc) {
 
     }
@@ -168,6 +160,30 @@ public abstract class BaseEventController {
         return null;
     }
 
+    public void onNpcEnterVehicle(NPC npc, Vehicle vehicle) {
+
+    }
+
+    public void onNpcLeaveVehicle(NPC npc, Vehicle vehicle) {
+
+    }
+
+    public void onNpcWeaponReceived(NPC npc, Weapon wep, boolean equipped) {
+
+    }
+
+    public void onNpcWeaponRemoved(NPC npc, Weapon wep, boolean equipped) {
+
+    }
+
+    public void onNpcRanOutOfAmmo(NPC npc, int weapon) {
+
+    }
+
+    public void onNpcIsAboutToAttack(NPC npc, GameEntity entity) {
+
+    }
+
     public void onNpcActionChanged(NPC npc, NPCAction oldAction, NPCAction newAction) {
 
     }
@@ -181,6 +197,62 @@ public abstract class BaseEventController {
     }
 
     public void onNpcHeardNoise(NPC npc, Vector noiseLocation) {
+
+    }
+
+    public void onNpcReachedLocation(NPC npc, String location) {
+
+    }
+
+    public void onNpcReachedFollowTarget(NPC npc, GameEntity entity) {
+
+    }
+
+    public void onNPCStartedSwimming(NPC npc) {
+
+    }
+
+    public void onNPCStoppedSwimming(NPC npc) {
+
+    }
+
+    public void onNPCDivedUnderwater(NPC npc) {
+
+    }
+
+    public void onNPCReachedWaterSurface(NPC npc) {
+
+    }
+
+    public void onNpcEnemyDied(NPC npc, GameEntity entity) {
+
+    }
+
+    public void onNpcEnemyEnterVehicle(NPC npc, GameEntity entity, Vehicle vehicle, boolean asDriver) {
+
+    }
+
+    public void onNpcEnemyLeaveVehicle(NPC npc, GameEntity entity, Vehicle vehicle, boolean asDriver) {
+
+    }
+
+    public void onNpcEnemyLeftServer(NPC npc, Player player) {
+
+    }
+
+    public void onNpcFollowTargetDied(NPC npc, GameEntity entity) {
+
+    }
+
+    public void onNpcFollowTargetEnterVehicle(NPC npc, GameEntity entity, Vehicle vehicle, boolean asDriver) {
+
+    }
+
+    public void onNpcFollowTargetLeaveVehicle(NPC npc, GameEntity entity, Vehicle vehicle, boolean asDriver) {
+
+    }
+
+    public void onNpcFollowTargetLeftServer(NPC npc, Player player) {
 
     }
 
@@ -208,19 +280,19 @@ public abstract class BaseEventController {
 
     }
 
-    public Float onObjectReceiveDamage(GameObject obj, DamageEvent ev) {
+    public Float onObjectReceiveDamage(GameObject obj, DamageEvent damageEvent) {
         return null;
     }
 
-    public void onObjectTouched(GameObject obj, GameEntity gameEntity) {
+    public void onObjectTouched(GameObject obj, GameEntity entity) {
 
     }
 
-    public void onObjectOverlapped(GameObject obj, GameEntity gameEntity) {
+    public void onObjectOverlapped(GameObject obj, GameEntity entity) {
 
     }
 
-    public void onObjecStoppedOverlapping(GameObject obj, GameEntity gameEntity) {
+    public void onObjectStoppedOverlapping(GameObject obj, GameEntity entity) {
 
     }
 
@@ -243,77 +315,4 @@ public abstract class BaseEventController {
     public void onZoneLeave(Zone zone, GameEntity entity) {
 
     }
-
-    public void onNpcWeaponReceived(NPC npc, Weapon wep, boolean equipped) {
-
-    }
-
-    public void onNpcWeaponRemoved(NPC npc, Weapon wep, boolean equipped) {
-
-    }
-
-    public void onPlayerWeaponReceived(Player player, Weapon wep, boolean equipped) {
-
-    }
-
-    public void onPlayerWeaponRemoved(Player player, Weapon wep, boolean equipped) {
-
-    }
-
-    public void onNpcEnterVehicle(NPC npc, Vehicle vehicle) {
-
-    }
-
-    public void onNpcLeaveVehicle(NPC npc, Vehicle vehicle) {
-
-    }
-
-    public void onNpcReachedLocation(NPC npc, String location) {
-
-    }
-
-    public void onNpcEnemyDied(NPC npc, GameEntity ent) {
-
-    }
-
-    public void onNpcEnemyLeftServer(NPC npc, Player player) {
-
-    }
-
-    public void onNpcEnemyEnterVehicle(NPC npc, GameEntity ent, Vehicle vehicle, boolean asDriver) {
-
-    }
-
-    public void onNpcEnemyLeaveVehicle(NPC npc, GameEntity ent, Vehicle vehicle, boolean asDriver) {
-
-    }
-
-    public void onNpcFollowTargetDied(NPC npc, GameEntity ent) {
-
-    }
-
-    public void onNpcFollowTargetLeftServer(NPC npc, Player player) {
-
-    }
-
-    public void onNpcFollowTargetEnterVehicle(NPC npc, GameEntity ent, Vehicle vehicle, boolean asDriver) {
-
-    }
-
-    public void onNpcFollowTargetLeaveVehicle(NPC npc, GameEntity ent, Vehicle vehicle, boolean asDriver) {
-
-    }
-
-    public void onNpcReachedFollowTarget(NPC npc, GameEntity ent) {
-
-    }
-
-    public void onNpcRanOutOfAmmo(NPC npc, int weapon) {
-
-    }
-
-    public void onNpcIsAboutToAttack(NPC npc, GameEntity ent) {
-
-    }
-
 }
