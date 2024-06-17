@@ -11,6 +11,7 @@ import com.github.newk5.vf.server.core.entities.npc.NPCSpawnProps;
 import com.github.newk5.vf.server.core.entities.npc.NPCType;
 import com.github.newk5.vf.server.core.entities.player.Player;
 import com.github.newk5.vf.server.core.entities.vehicle.Vehicle;
+import com.github.newk5.vf.server.core.entities.vehicle.VehicleSpawnProps;
 import com.github.newk5.vf.server.core.entities.zone.Zone;
 import com.github.newk5.vf.server.core.entities.zone.ZoneSpawnProps;
 import com.github.newk5.vf.server.core.exceptions.InvalidThreadException;
@@ -36,6 +37,31 @@ public class Server {
     protected Server(InternalServerEvents internalEvents) {
         commandRegistry = new CommandRegistry();
         baseServerEvents = internalEvents;
+    }
+
+    private native Rotation nativeCreateRotationFromAxes(double fwdX, double fwdY, double fwdZ, double rightX, double rightY, double rightZ, double upX, double upY, double upZ);
+
+    public Rotation createRotationFromAxes(Vector forwardDirection, Vector rightDirection, Vector upDirection) {
+        if (threadIsValid()) {
+            return nativeCreateRotationFromAxes(forwardDirection.x, forwardDirection.y, forwardDirection.z, rightDirection.x, rightDirection.y, rightDirection.z, upDirection.x, upDirection.y, upDirection.z);
+        }
+        return null;
+    }
+
+    private native int nativeSpawnVehicle(double x, double y, double z, double yaw, double pitch, double roll, int modelId);
+
+    public Vehicle spawnVehicle(VehicleSpawnProps props) {
+        if (threadIsValid()) {
+            Integer id = nativeSpawnVehicle(props.position.x, props.position.y, props.position.z, props.rotation.yaw, props.rotation.pitch, props.rotation.roll, props.getModelId());
+            return getVehicle(id);
+        }
+        return null;
+    }
+
+    private native String nativeGetConfigProperty(String section, String property);
+
+    public String getConfigProperty(String section, String property) {
+        return threadIsValid() ? this.nativeGetConfigProperty(section, property) : null;
     }
 
     private native double nativeGetWaterLevel();

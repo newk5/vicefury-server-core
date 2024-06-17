@@ -2,6 +2,7 @@ package com.github.newk5.vf.server.core.controllers;
 
 import com.github.newk5.vf.server.core.InternalServerEvents;
 import com.github.newk5.vf.server.core.Server;
+import com.github.newk5.vf.server.core.entities.GameCharacter;
 import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.npc.NPCAction;
 import com.github.newk5.vf.server.core.entities.Vector;
@@ -22,6 +23,26 @@ public abstract class NPCController {
     }
 
     public void onCreated() {
+
+    }
+
+    public void onDowned(GameEntity by) {
+
+    }
+
+    public void onRevive(GameEntity by) {
+
+    }
+
+    public void onStartedCharacterRevive(GameCharacter character) {
+
+    }
+
+    public void onFailedCharacterRevive(GameCharacter character) {
+
+    }
+
+    public void onFinishedCharacterRevive(GameCharacter character) {
 
     }
 
@@ -94,6 +115,14 @@ public abstract class NPCController {
     }
 
     public void onEnemyDied(GameEntity enemy) {
+
+    }
+
+    public void onEnemyDowned( GameEntity downedBy) {
+
+    }
+
+    public void onFollowTargetDowned( GameEntity downedBy) {
 
     }
 

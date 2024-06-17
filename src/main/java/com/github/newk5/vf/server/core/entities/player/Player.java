@@ -5,6 +5,8 @@ import com.github.newk5.vf.server.core.entities.DamageableEntity;
 import com.github.newk5.vf.server.core.entities.GameCharacter;
 import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.GameEntityType;
+import com.github.newk5.vf.server.core.entities.Rotation;
+import com.github.newk5.vf.server.core.entities.Transform;
 import com.github.newk5.vf.server.core.entities.Vector;
 import com.github.newk5.vf.server.core.entities.VectorWithAngle;
 import com.github.newk5.vf.server.core.entities.Weapon;
@@ -23,6 +25,410 @@ public class Player extends GameCharacter {
         super();
         this.id = id;
         this.type = GameEntityType.PLAYER;
+    }
+
+    private native void nativeInterpFreeCamTo(int id, double XPos, double YPos, double ZPos, double Yaw, double Pitch, double Roll, double Speed);
+
+    public Player interpFreeCamTo(Transform transform, double speed) {
+        if (isOnMainThread()) {
+            nativeInterpFreeCamTo(id, transform.position.x, transform.position.y, transform.position.z, transform.rotation.yaw, transform.rotation.pitch, transform.rotation.roll, speed);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeInterpFreeCamTo(id, transform.position.x, transform.position.y, transform.position.z, transform.rotation.yaw, transform.rotation.pitch, transform.rotation.roll, speed);
+            });
+        }
+        return this;
+    }
+
+    private native Rotation nativeGetFreeCamRotation(int id);
+
+    public Rotation getFreeCamRotation() {
+        return threadIsValid() ? this.nativeGetFreeCamRotation(this.id) : null;
+    }
+
+    private native Vector nativeGetFreeCamPosition(int id);
+
+    public Vector getFreeCamPosition() {
+        return threadIsValid() ? this.nativeGetFreeCamPosition(this.id) : null;
+    }
+
+    private native Vector nativeGetFreeCamDirection(int id);
+
+    public Vector getFreeCamDirection() {
+        return threadIsValid() ? this.nativeGetFreeCamDirection(this.id) : null;
+    }
+
+    private native void nativeAllowAccessToRemotePlayerData(int id);
+
+    public Player allowAccessToRemotePlayerData() {
+        if (isOnMainThread()) {
+            nativeAllowAccessToRemotePlayerData(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeAllowAccessToRemotePlayerData(id);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeAllowAccessToRemoteVehicleData(int id);
+
+    public Player allowAccessToRemoteVehicleData() {
+        if (isOnMainThread()) {
+            nativeAllowAccessToRemoteVehicleData(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeAllowAccessToRemoteVehicleData(id);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeAllowAccessToRemoteNPCData(int id);
+
+    public Player allowAccessToRemoteNPCData() {
+        if (isOnMainThread()) {
+            nativeAllowAccessToRemoteNPCData(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeAllowAccessToRemoteNPCData(id);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeAllowAccessToRemoteObjectData(int id);
+
+    public Player allowAccessToRemoteObjectData() {
+        if (isOnMainThread()) {
+            nativeAllowAccessToRemoteObjectData(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeAllowAccessToRemoteObjectData(id);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeDisallowAccessToRemotePlayerData(int id);
+
+    public Player disallowAccessToRemotePlayerData() {
+        if (isOnMainThread()) {
+            nativeDisallowAccessToRemotePlayerData(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeDisallowAccessToRemotePlayerData(id);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeDisallowAccessToRemoteVehicleData(int id);
+
+    public Player disallowAccessToRemoteVehicleData() {
+        if (isOnMainThread()) {
+            nativeDisallowAccessToRemoteVehicleData(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeDisallowAccessToRemoteVehicleData(id);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeDisallowAccessToRemoteNPCData(int id);
+
+    public Player disallowAccessToRemoteNPCData() {
+        if (isOnMainThread()) {
+            nativeDisallowAccessToRemoteNPCData(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeDisallowAccessToRemoteNPCData(id);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeDisallowAccessToRemoteObjectData(int id);
+
+    public Player disallowAccessToRemoteObjectData() {
+        if (isOnMainThread()) {
+            nativeDisallowAccessToRemoteObjectData(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeDisallowAccessToRemoteObjectData(id);
+            });
+        }
+        return this;
+    }
+
+    private native boolean nativeHasAccessToRemotePlayerData(int id);
+
+    public boolean hasAccessToRemotePlayerData() {
+        if (threadIsValid()) {
+            return nativeHasAccessToRemotePlayerData(id);
+        }
+        return false;
+    }
+
+    private native boolean nativeHasAccessToRemoteVehicleData(int id);
+
+    public boolean hasAccessToRemoteVehicleData() {
+        if (threadIsValid()) {
+            return nativeHasAccessToRemoteVehicleData(id);
+        }
+        return false;
+    }
+
+    private native boolean nativeHasAccessToRemoteObjectData(int id);
+
+    public boolean hasAccessToRemoteObjectData() {
+        if (threadIsValid()) {
+            return nativeHasAccessToRemoteObjectData(id);
+        }
+        return false;
+    }
+
+    private native boolean nativeHasAccessToRemoteNPCData(int id);
+
+    public boolean hasAccessToRemoteNPCData() {
+        if (threadIsValid()) {
+            return nativeHasAccessToRemoteNPCData(id);
+        }
+        return false;
+    }
+
+    private native void nativeEnableFreeCamWithDisabledControls(int id);
+
+    public Player enableFreeCamWithDisabledControls() {
+        if (isOnMainThread()) {
+            nativeEnableFreeCamWithDisabledControls(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeEnableFreeCamWithDisabledControls(id);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeEnableFreeCamWithTransformAndDisableControls(int id, double XPos, double YPos, double ZPos, double Yaw, double Pitch, double Roll);
+
+    public Player enableFreeCamWithTransformAndDisableControls(Transform transform) {
+        if (isOnMainThread()) {
+            nativeEnableFreeCamWithTransformAndDisableControls(id, transform.position.x, transform.position.y, transform.position.z, transform.rotation.yaw, transform.rotation.pitch, transform.rotation.roll);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeEnableFreeCamWithTransformAndDisableControls(id, transform.position.x, transform.position.y, transform.position.z, transform.rotation.yaw, transform.rotation.pitch, transform.rotation.roll);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeEnableFreeCamWithDisabledControlsAndInterpTo(int id, double XPos, double YPos, double ZPos, double Yaw, double Pitch, double Roll, double Speed);
+
+    public Player enableFreeCamWithDisabledControlsAndInterpTo(Transform transform, double speed) {
+        if (isOnMainThread()) {
+            nativeEnableFreeCamWithDisabledControlsAndInterpTo(id, transform.position.x, transform.position.y, transform.position.z, transform.rotation.yaw, transform.rotation.pitch, transform.rotation.roll, speed);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeEnableFreeCamWithDisabledControlsAndInterpTo(id, transform.position.x, transform.position.y, transform.position.z, transform.rotation.yaw, transform.rotation.pitch, transform.rotation.roll, speed);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeSetFreeCamTransform(int player, double XPos, double YPos, double ZPos, double Yaw, double Pitch, double Roll);
+
+    public Player setFreeCamTransform(Transform transform) {
+        if (isOnMainThread()) {
+            nativeSetFreeCamTransform(id, transform.position.x, transform.position.y, transform.position.z, transform.rotation.yaw, transform.rotation.pitch, transform.rotation.roll);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetFreeCamTransform(id, transform.position.x, transform.position.y, transform.position.z, transform.rotation.yaw, transform.rotation.pitch, transform.rotation.roll);
+            });
+        }
+        return this;
+    }
+
+    private native boolean nativeIsRevivingSomeone(int id);
+
+    public boolean isRevivingSomeone() {
+        if (threadIsValid()) {
+            return nativeIsRevivingSomeone(id);
+        }
+        return false;
+    }
+
+    private native boolean nativeIsRevivingCharacter(int id, int charType, int charId);
+
+    public boolean isRevivingCharacter(GameCharacter character) {
+        if (character == null) {
+            return false;
+        }
+        if (threadIsValid()) {
+            return nativeIsRevivingCharacter(id, character.type.value, character.getId());
+        }
+        return false;
+
+    }
+
+    private native boolean nativeIsBeingRevived(int id);
+
+    public boolean isBeingRevived() {
+        if (threadIsValid()) {
+            return nativeIsBeingRevived(id);
+        }
+        return false;
+    }
+
+    private native boolean nativeIsBeingRevivedBy(int id, int charType, int charId);
+
+    public boolean isBeingRevivedBy(GameCharacter by) {
+        if (by == null) {
+            return false;
+        }
+        if (threadIsValid()) {
+            return nativeIsBeingRevivedBy(id, by.type.value, by.getId());
+        }
+        return false;
+    }
+
+    private native void nativeDownPlayer(int id);
+
+    public Player down() {
+        if (isOnMainThread()) {
+            nativeDownPlayer(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeDownPlayer(id);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeRevivePlayer(int id);
+
+    public Player revive() {
+        if (isOnMainThread()) {
+            nativeRevivePlayer(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeRevivePlayer(id);
+            });
+        }
+        return this;
+    }
+
+    private native boolean nativeCanBeRevived(int id);
+
+    public boolean canBeRevived() {
+        if (threadIsValid()) {
+            return nativeCanBeRevived(id);
+        }
+        return false;
+    }
+
+    private native void nativeSetCanBeRevived(int id, boolean Status);
+
+    public Player setCanBeRevived(boolean Status) {
+        if (isOnMainThread()) {
+            nativeSetCanBeRevived(id, Status);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetCanBeRevived(id, Status);
+            });
+
+        }
+        return this;
+    }
+
+    private native boolean nativeIsAwaitingRevive(int id);
+
+    public boolean isAwaitingRevive() {
+        if (threadIsValid()) {
+            return nativeIsAwaitingRevive(id);
+        }
+        return false;
+    }
+
+    private native float nativeGetReviveWaitTime(int id);
+
+    public float getReviveWaitTime() {
+        return threadIsValid() ? this.nativeGetReviveWaitTime(this.id) : -1;
+    }
+
+    private native void nativeSetReviveWaitTime(int id, float Seconds);
+
+    public Player setReviveWaitTime(float Seconds) {
+        if (isOnMainThread()) {
+            nativeSetReviveWaitTime(id, Seconds);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetReviveWaitTime(id, Seconds);
+            });
+
+        }
+        return this;
+    }
+
+    private native float nativeGetReviveDuration(int id);
+
+    public float getReviveDuration() {
+        return threadIsValid() ? this.nativeGetReviveDuration(this.id) : -1;
+    }
+
+    private native void nativeSetReviveDuration(int id, float Seconds);
+
+    public Player setReviveDuration(float Seconds) {
+        if (isOnMainThread()) {
+            nativeSetReviveDuration(id, Seconds);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetReviveDuration(id, Seconds);
+            });
+
+        }
+        return this;
+    }
+
+    private native float nativeGetAwatingReviveHP(int id);
+
+    public float getAwatingReviveHP() {
+        return threadIsValid() ? this.nativeGetAwatingReviveHP(this.id) : -1;
+    }
+
+    private native void nativeSetAwatingReviveHP(int id, float HP);
+
+    public Player setAwatingReviveHP(float HP) {
+        if (isOnMainThread()) {
+            nativeSetAwatingReviveHP(id, HP);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetAwatingReviveHP(id, HP);
+            });
+
+        }
+        return this;
+    }
+
+    private native float nativeGetHPWhenRevived(int id);
+
+    public float getHPWhenRevived() {
+        return threadIsValid() ? this.nativeGetHPWhenRevived(this.id) : -1;
+    }
+
+    private native void nativeSetHPWhenRevived(int id, float HP);
+
+    public Player setHPWhenRevived(float HP) {
+        if (isOnMainThread()) {
+            nativeSetHPWhenRevived(id, HP);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetHPWhenRevived(id, HP);
+            });
+
+        }
+        return this;
     }
 
     public boolean isAuthenticated() {
@@ -140,12 +546,12 @@ public class Player extends GameCharacter {
     }
 
     public Player sendChatMessage(String message) {
-        InternalServerEvents.server.sendChatMessage(this.id,0xFFFFFFFF, message);
+        InternalServerEvents.server.sendChatMessage(this.id, 0xFFFFFFFF, message);
         return this;
     }
 
     public Player sendChatMessage(String message, Object... args) {
-        InternalServerEvents.server.sendChatMessage(this.id,0xFFFFFFFF, message, args);
+        InternalServerEvents.server.sendChatMessage(this.id, 0xFFFFFFFF, message, args);
         return this;
     }
 

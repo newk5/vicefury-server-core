@@ -49,8 +49,8 @@ public class Vector {
         return (this.x * other.x) + (this.y * other.y) + (this.z * other.z);
     }
 
-    public Vector pushInDirection(Vector direction, double distance) {
-        return MathUtils.pushPointInDirection(this, direction, distance);
+    public Vector moveInDirection(Vector direction, double distance) {
+        return MathUtils.movePointInDirection(this, direction, distance);
     }
 
     public Vector crossProduct(Vector other) {

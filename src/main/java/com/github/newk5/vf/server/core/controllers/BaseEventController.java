@@ -2,6 +2,7 @@ package com.github.newk5.vf.server.core.controllers;
 
 import com.github.newk5.vf.server.core.PluginLoader;
 import com.github.newk5.vf.server.core.Server;
+import com.github.newk5.vf.server.core.entities.GameCharacter;
 import com.github.newk5.vf.server.core.entities.GameEntity;
 import com.github.newk5.vf.server.core.entities.Vector;
 import com.github.newk5.vf.server.core.entities.Weapon;
@@ -208,19 +209,19 @@ public abstract class BaseEventController {
 
     }
 
-    public void onNPCStartedSwimming(NPC npc) {
+    public void onNpcStartedSwimming(NPC npc) {
 
     }
 
-    public void onNPCStoppedSwimming(NPC npc) {
+    public void onNpcStoppedSwimming(NPC npc) {
 
     }
 
-    public void onNPCDivedUnderwater(NPC npc) {
+    public void onNpcDivedUnderwater(NPC npc) {
 
     }
 
-    public void onNPCReachedWaterSurface(NPC npc) {
+    public void onNpcReachedWaterSurface(NPC npc) {
 
     }
 
@@ -315,4 +316,45 @@ public abstract class BaseEventController {
     public void onZoneLeave(Zone zone, GameEntity entity) {
 
     }
+
+    public void onNpcDowned(NPC npc, GameEntity by) {
+
+    }
+
+    public void onPlayerDowned(Player player, GameEntity by) {
+
+    }
+
+    public void onPlayerRevived(Player player, GameEntity by) {
+
+    }
+
+    public void onNpcRevived(NPC npc, GameEntity by) {
+
+    }
+
+    public void onPlayerStartedRevive(Player player, GameCharacter character) {
+
+    }
+
+    public void onNpcStartedRevive(NPC npc, GameCharacter character) {
+
+    }
+
+    public void onPlayerFailedRevive(Player player, GameCharacter charBeingRevived) {
+
+    }
+
+    public void onNpcFailedRevive(NPC npc, GameCharacter charBeingRevived) {
+
+    }
+
+    public void onNPCEnemyDowned(NPC npc,  GameEntity by) {
+
+    }
+
+    public void onNPCFollowTargetDowned(NPC npc,  GameEntity by) {
+
+    }
+
 }

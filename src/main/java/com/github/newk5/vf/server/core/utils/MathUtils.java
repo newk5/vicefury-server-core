@@ -8,7 +8,7 @@ public abstract class MathUtils {
         return direction.multiply(-1);
     }
 
-    public static  Vector pushPointInDirection(Vector position, Vector direction, double distance) {
+    public static  Vector movePointInDirection(Vector position, Vector direction, double distance) {
 
         return position.add(direction.multiply(distance));
     }

@@ -28,6 +28,68 @@ public class NPC extends GameCharacter {
         this.type = GameEntityType.NPC;
     }
 
+    private native int nativeGetSubtype(int id);
+
+    public int getSubtype() {
+        return threadIsValid() ? this.nativeGetSubtype(this.id) : -1;
+    }
+
+    private native boolean nativeIsRevivingSomeone(int id);
+
+    public boolean isRevivingSomeone() {
+        if (threadIsValid()) {
+            return nativeIsRevivingSomeone(id);
+        }
+        return false;
+    }
+
+    private native boolean nativeIsRevivingCharacter(int id, int charType, int charId);
+
+    public boolean isRevivingCharacter(GameCharacter character) {
+        if (character == null) {
+            return false;
+        }
+        if (threadIsValid()) {
+            return nativeIsRevivingCharacter(id, character.type.value, character.getId());
+        }
+        return false;
+
+    }
+
+    private native boolean nativeIsBeingRevived(int id);
+
+    public boolean isBeingRevived() {
+        if (threadIsValid()) {
+            return nativeIsBeingRevived(id);
+        }
+        return false;
+    }
+
+    private native boolean nativeIsBeingRevivedBy(int id, int charType, int charId);
+
+    public boolean isBeingRevivedBy(GameCharacter by) {
+        if (by == null) {
+            return false;
+        }
+        if (threadIsValid()) {
+            return nativeIsBeingRevivedBy(id, by.type.value, by.getId());
+        }
+        return false;
+    }
+
+    private native void nativeReviveCharacter(int id, int charType, int charId);
+
+    public NPC reviveCharacter(GameCharacter playerOrNpc) {
+        if (isOnMainThread()) {
+            nativeReviveCharacter(id, playerOrNpc.type.value, playerOrNpc.getId());
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeReviveCharacter(id, playerOrNpc.type.value, playerOrNpc.getId());
+            });
+        }
+        return this;
+    }
+
     public NPCType getNPCType() {
         return this.NPCType;
     }
@@ -68,6 +130,144 @@ public class NPC extends GameCharacter {
 
     public <T> T getCastedController() {
         return (T) this.controller;
+    }
+
+    private native void nativeReviveNpc(int id);
+
+    public NPC revive() {
+        if (isOnMainThread()) {
+            nativeReviveNpc(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeReviveNpc(id);
+            });
+        }
+        return this;
+    }
+
+    private native void nativeDownNpc(int id);
+
+    public NPC down() {
+        if (isOnMainThread()) {
+            nativeDownNpc(id);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeDownNpc(id);
+            });
+        }
+        return this;
+    }
+
+    private native boolean nativeCanBeRevived(int id);
+
+    public boolean canBeRevived() {
+        if (threadIsValid()) {
+            return nativeCanBeRevived(id);
+        }
+        return false;
+    }
+
+    private native void nativeSetCanBeRevived(int id, boolean Status);
+
+    public NPC setCanBeRevived(boolean Status) {
+        if (isOnMainThread()) {
+            nativeSetCanBeRevived(id, Status);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetCanBeRevived(id, Status);
+            });
+
+        }
+        return this;
+    }
+
+    private native boolean nativeIsAwaitingRevive(int id);
+
+    public boolean isAwaitingRevive() {
+        if (threadIsValid()) {
+            return nativeIsAwaitingRevive(id);
+        }
+        return false;
+    }
+
+    private native float nativeGetReviveWaitTime(int id);
+
+    public float getReviveWaitTime() {
+        return threadIsValid() ? this.nativeGetReviveWaitTime(this.id) : -1;
+    }
+
+    private native void nativeSetReviveWaitTime(int id, float Seconds);
+
+    public NPC setReviveWaitTime(float Seconds) {
+        if (isOnMainThread()) {
+            nativeSetReviveWaitTime(id, Seconds);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetReviveWaitTime(id, Seconds);
+            });
+
+        }
+        return this;
+    }
+
+    private native float nativeGetReviveDuration(int id);
+
+    public float getReviveDuration() {
+        return threadIsValid() ? this.nativeGetReviveDuration(this.id) : -1;
+    }
+
+    private native void nativeSetReviveDuration(int id, float Seconds);
+
+    public NPC setReviveDuration(float Seconds) {
+        if (isOnMainThread()) {
+            nativeSetReviveDuration(id, Seconds);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetReviveDuration(id, Seconds);
+            });
+
+        }
+        return this;
+    }
+
+    private native float nativeGetAwatingReviveHP(int id);
+
+    public float getAwatingReviveHP() {
+        return threadIsValid() ? this.nativeGetAwatingReviveHP(this.id) : -1;
+    }
+
+    private native void nativeSetAwatingReviveHP(int id, float HP);
+
+    public NPC setAwatingReviveHP(float HP) {
+        if (isOnMainThread()) {
+            nativeSetAwatingReviveHP(id, HP);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetAwatingReviveHP(id, HP);
+            });
+
+        }
+        return this;
+    }
+
+    private native float nativeGetHPWhenRevived(int id);
+
+    public float getHPWhenRevived() {
+        return threadIsValid() ? this.nativeGetHPWhenRevived(this.id) : -1;
+    }
+
+    private native void nativeSetHPWhenRevived(int id, float HP);
+
+    public NPC setHPWhenRevived(float HP) {
+        if (isOnMainThread()) {
+            nativeSetHPWhenRevived(id, HP);
+        } else {
+            InternalServerEvents.server.mainThread(() -> {
+                nativeSetHPWhenRevived(id, HP);
+            });
+
+        }
+        return this;
     }
 
     private native void nativeEnableAvoidance(int id);
