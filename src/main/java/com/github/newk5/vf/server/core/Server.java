@@ -64,6 +64,17 @@ public class Server {
         return threadIsValid() ? this.nativeGetConfigProperty(section, property) : null;
     }
 
+    public String getConfigProperty(String section, String property, String defaultValue) {
+        if (threadIsValid()) {
+            String v = this.nativeGetConfigProperty(section, property);
+            if (v.equals("")) {
+                return defaultValue;
+            }
+            return v;
+        }
+        return null;
+    }
+
     private native double nativeGetWaterLevel();
 
     public double getWaterLevel() {
