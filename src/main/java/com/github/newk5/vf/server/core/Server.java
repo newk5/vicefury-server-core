@@ -39,6 +39,70 @@ public class Server {
         baseServerEvents = internalEvents;
     }
 
+    private native String nativeGetServerVersion();
+
+    public String getServerVersion() {
+        if (threadIsValid()) {
+            return nativeGetServerVersion();
+        }
+        return "";
+    }
+
+    private native String nativeGetServerName();
+
+    public String getServerName() {
+        if (threadIsValid()) {
+            nativeGetServerName();
+        }
+        return "";
+
+    }
+
+    private native String nativeGetServerPassword();
+
+    public String getServerPassword() {
+        if (threadIsValid()) {
+            return nativeGetServerPassword();
+        }
+        return "";
+    }
+
+    private native void nativeSetServerPassword(String pwd);
+
+    private native void nativeSetServerName(String name);
+
+    public void setServerPassword(String pwd) {
+        if (isOnMainThread()) {
+            nativeSetServerPassword(pwd);
+        } else {
+            mainThread(() -> {
+                nativeSetServerPassword(pwd);
+            });
+        }
+    }
+
+    public Server unlock() {
+        setServerPassword("");
+        return this;
+    }
+
+    public boolean isLocked() {
+        if (isOnMainThread()) {
+            return !getServerPassword().equals("");
+        }
+        return false;
+    }
+
+    public void setServerName(String name) {
+        if (isOnMainThread()) {
+            nativeSetServerName(name);
+        } else {
+            mainThread(() -> {
+                nativeSetServerName(name);
+            });
+        }
+    }
+
     private native Rotation nativeCreateRotationFromAxes(double fwdX, double fwdY, double fwdZ, double rightX, double rightY, double rightZ, double upX, double upY, double upZ);
 
     public Rotation createRotationFromAxes(Vector forwardDirection, Vector rightDirection, Vector upDirection) {

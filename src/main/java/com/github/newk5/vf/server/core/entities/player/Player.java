@@ -391,20 +391,20 @@ public class Player extends GameCharacter {
         return this;
     }
 
-    private native float nativeGetAwatingReviveHP(int id);
+    private native float nativeGetAwaitingReviveHP(int id);
 
-    public float getAwatingReviveHP() {
-        return threadIsValid() ? this.nativeGetAwatingReviveHP(this.id) : -1;
+    public float getAwaitingReviveHP() {
+        return threadIsValid() ? this.nativeGetAwaitingReviveHP(this.id) : -1;
     }
 
-    private native void nativeSetAwatingReviveHP(int id, float HP);
+    private native void nativeSetAwaitingReviveHP(int id, float HP);
 
-    public Player setAwatingReviveHP(float HP) {
+    public Player setAwaitingReviveHP(float HP) {
         if (isOnMainThread()) {
-            nativeSetAwatingReviveHP(id, HP);
+            nativeSetAwaitingReviveHP(id, HP);
         } else {
             InternalServerEvents.server.mainThread(() -> {
-                nativeSetAwatingReviveHP(id, HP);
+                nativeSetAwaitingReviveHP(id, HP);
             });
 
         }
