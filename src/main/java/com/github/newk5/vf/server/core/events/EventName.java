@@ -11,6 +11,10 @@ public interface EventName {
     String onPlayerSpawnScreenSkinChange = "onPlayerSpawnScreenSkinChange";
     String onPlayerSpawn = "onPlayerSpawn";
     String onPlayerDied = "onPlayerDied";
+    String onPlayerDowned = "onPlayerDowned";
+    String onPlayerRevived = "onPlayerRevived";
+    String onPlayerStartedRevive = "onPlayerStartedRevive";
+    String onPlayerFailedRevive = "onPlayerFailedRevive";
     String onPlayerMessage = "onPlayerMessage";
     String onPlayerCommand = "onPlayerCommand";
     String onDataReceived = "onDataReceived";
@@ -27,6 +31,10 @@ public interface EventName {
     String onNpcDestroy = "onNpcDestroy";
     String onNpcSpawned = "onNpcSpawned";
     String onNpcDied = "onNpcDied";
+    String onNpcDowned = "onNpcDowned";
+    String onNpcRevived = "onNpcRevived";
+    String onNpcStartedRevive = "onNpcStartedRevive";
+    String onNpcFailedRevive = "onNpcFailedRevive";
     String onNpcReceiveDamage = "onNpcReceiveDamage";
     String onNpcEnterVehicle = "onNpcEnterVehicle";
     String onNpcLeaveVehicle = "onNpcLeaveVehicle";
@@ -45,10 +53,12 @@ public interface EventName {
     String onNpcDivedUnderwater = "onNpcDivedUnderwater";
     String onNpcReachedWaterSurface = "onNpcReachedWaterSurface";
     String onNpcEnemyDied = "onNpcEnemyDied";
+    String onNpcEnemyDowned = "onNpcEnemyDowned";
     String onNpcEnemyEnterVehicle = "onNpcEnemyEnterVehicle";
     String onNpcEnemyLeaveVehicle = "onNpcEnemyLeaveVehicle";
     String onNpcEnemyLeftServer = "onNpcEnemyLeftServer";
     String onNpcFollowTargetDied = "onNpcFollowTargetDied";
+    String onNpcFollowTargetDowned = "onNpcFollowTargetDowned";
     String onNpcFollowTargetEnterVehicle = "onNpcFollowTargetEnterVehicle";
     String onNpcFollowTargetLeaveVehicle = "onNpcFollowTargetLeaveVehicle";
     String onNpcFollowTargetLeftServer = "onNpcFollowTargetLeftServer";

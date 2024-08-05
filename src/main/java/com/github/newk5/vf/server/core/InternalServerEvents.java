@@ -299,6 +299,74 @@ public class InternalServerEvents {
         Events.emit(EventName.onPlayerDied, player, damageEvent);
     }
 
+    public void onPlayerDowned(Player player, int entityType, int entityID) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onPlayerDowned(player, entity);
+                }
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onPlayerDowned, player, entity);
+    }
+
+    public void onPlayerRevived(Player player, int entityType, int entityID) {
+        GameEntity revivedBy = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onPlayerRevived(player, revivedBy);
+                }
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onPlayerRevived, player, revivedBy);
+
+        if (revivedBy instanceof NPC) {
+            NPC revivedByNpc = (NPC) revivedBy;
+            NPCController revByCtrl = revivedByNpc.getController();
+            if (revByCtrl != null) {
+                revByCtrl.onFinishedCharacterRevive(player);
+            }
+        }
+    }
+
+    public void onPlayerStartedRevive(Player player, int entityType, int entityID) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onPlayerStartedRevive(player, entity == null ? null : entity.asGameCharacter());
+                }
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onPlayerStartedRevive, player, entity == null ? null : entity.asGameCharacter());
+    }
+
+    public void onPlayerFailedRevive(Player player, int entityType, int entityID) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onPlayerFailedRevive(player, entity == null ? null : entity.asGameCharacter());
+                }
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onPlayerFailedRevive, player, entity == null ? null : entity.asGameCharacter());
+    }
+
     public boolean onPlayerMessage(Player player, String message) {
         for (Entry<String, BaseEventController> entry : eventHandlers.entrySet()) {
             if (!entry.getValue().isDisabled()) {
@@ -631,191 +699,6 @@ public class InternalServerEvents {
         }
     }
 
-    public void onNPCDowned(NPC npc, int entityType, int entityID) {
-        GameEntity ent = server.getGameEntity(entityType, entityID);
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcDowned(npc, ent);
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-
-        NPCController c = npc.getController();
-        if (c != null) {
-            c.onDowned(ent);
-        }
-
-    }
-
-    public void onPlayerRevived(Player player, int entityType, int entityID) {
-        GameEntity revivedBy = server.getGameEntity(entityType, entityID);
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onPlayerRevived(player, revivedBy);
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-        if (revivedBy instanceof NPC) {
-            NPC revivedByNpc = (NPC) revivedBy;
-            NPCController revByCtrl = revivedByNpc.getController();
-            if (revByCtrl != null) {
-                revByCtrl.onFinishedCharacterRevive(player);
-            }
-        }
-
-    }
-
-    public void onPlayerStartedRevive(Player player, int entityType, int entityID) {
-        GameEntity ent = server.getGameEntity(entityType, entityID);
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onPlayerStartedRevive(player, ent == null ? null : ent.asGameCharacter());
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-
-    }
-
-    public void onNPCRevived(NPC npc, int entityType, int entityID) {
-        GameEntity revivedBy = server.getGameEntity(entityType, entityID);
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcRevived(npc, revivedBy);
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-
-        NPCController c = npc.getController();
-        if (c != null) {
-            c.onRevive(revivedBy);
-        }
-        if (revivedBy instanceof NPC) {
-            NPC revivedByNpc = (NPC) revivedBy;
-            NPCController revByCtrl = revivedByNpc.getController();
-            if (revByCtrl != null) {
-                revByCtrl.onFinishedCharacterRevive(npc);
-            }
-        }
-
-    }
-
-    public void onNPCStartedRevive(NPC npc, int entityType, int entityID) {
-        GameEntity ent = server.getGameEntity(entityType, entityID);
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcStartedRevive(npc, ent == null ? null : ent.asGameCharacter());
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-
-        NPCController c = npc.getController();
-        if (c != null) {
-            c.onStartedCharacterRevive(ent == null ? null : ent.asGameCharacter());
-        }
-
-    }
-
-    public void onPlayerDowned(Player player, int entityType, int entityID) {
-        GameEntity ent = server.getGameEntity(entityType, entityID);
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onPlayerDowned(player, ent);
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-
-    }
-
-    public void onPlayerFailedRevive(Player player, int entityType, int entityID) {
-        GameEntity ent = server.getGameEntity(entityType, entityID);
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onPlayerFailedRevive(player, ent == null ? null : ent.asGameCharacter());
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-
-    }
-
-    public void onNPCFailedRevive(NPC npc, int entityType, int entityID) {
-        GameEntity ent = server.getGameEntity(entityType, entityID);
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNpcFailedRevive(npc, ent == null ? null : ent.asGameCharacter());
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-        NPCController c = npc.getController();
-        if (c != null) {
-            c.onFailedCharacterRevive(ent == null ? null : ent.asGameCharacter());
-        }
-
-    }
-
-    public void onNPCEnemyDowned(NPC npc, int entityType, int entityID) {
-        GameEntity ent = server.getGameEntity(entityType, entityID);
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNPCEnemyDowned(npc, ent);
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-        NPCController c = npc.getController();
-        if (c != null) {
-            c.onEnemyDowned(ent);
-        }
-
-    }
-
-    public void onNPCFollowTargetDowned(NPC npc, int entityType, int entityID) {
-        GameEntity ent = server.getGameEntity(entityType, entityID);
-
-        eventHandlers.forEach((name, handler) -> {
-            try {
-                if (!handler.isDisabled()) {
-                    handler.onNPCFollowTargetDowned(npc, ent);
-                }
-            } catch (final Exception e) {
-                catchException(e);
-            }
-        });
-        NPCController c = npc.getController();
-        if (c != null) {
-            c.onFollowTargetDowned(ent);
-        }
-
-    }
-
     public void onNPCDied(NPC npc, int source, int sourceId, int damagedByEntity, int damagedById, float damageToApply) {
         damageEvent.applyValues(source, sourceId, damagedByEntity, damagedById, damageToApply);
 
@@ -837,6 +720,93 @@ public class InternalServerEvents {
         NPCController c = npc.getController();
         if (c != null) {
             c.onDeath(damageEvent);
+        }
+    }
+
+    public void onNPCDowned(NPC npc, int entityType, int entityID) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcDowned(npc, entity);
+                }
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcDowned, npc, entity);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onDowned(entity);
+        }
+    }
+
+    public void onNPCRevived(NPC npc, int entityType, int entityID) {
+        GameEntity revivedBy = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcRevived(npc, revivedBy);
+                }
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcRevived, npc, revivedBy);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onRevive(revivedBy);
+        }
+        if (revivedBy instanceof NPC) {
+            NPC revivedByNpc = (NPC) revivedBy;
+            NPCController revByCtrl = revivedByNpc.getController();
+            if (revByCtrl != null) {
+                revByCtrl.onFinishedCharacterRevive(npc);
+            }
+        }
+    }
+
+    public void onNPCStartedRevive(NPC npc, int entityType, int entityID) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcStartedRevive(npc, entity == null ? null : entity.asGameCharacter());
+                }
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcStartedRevive, npc, entity == null ? null : entity.asGameCharacter());
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onStartedCharacterRevive(entity == null ? null : entity.asGameCharacter());
+        }
+    }
+
+    public void onNPCFailedRevive(NPC npc, int entityType, int entityID) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNpcFailedRevive(npc, entity == null ? null : entity.asGameCharacter());
+                }
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcFailedRevive, npc, entity == null ? null : entity.asGameCharacter());
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onFailedCharacterRevive(entity == null ? null : entity.asGameCharacter());
         }
     }
 
@@ -1229,6 +1199,25 @@ public class InternalServerEvents {
         }
     }
 
+    public void onNPCEnemyDowned(NPC npc, int entityType, int entityID) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNPCEnemyDowned(npc, entity);
+                }
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcEnemyDowned, npc, entity);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onEnemyDowned(entity);
+        }
+    }
+
     public void onNPCEnemyEnterVehicle(NPC npc, int entityType, int entityID, Vehicle vehicle, boolean asDriver) {
         GameEntity entity = server.getGameEntity(entityType, entityID);
 
@@ -1304,6 +1293,26 @@ public class InternalServerEvents {
         NPCController c = npc.getController();
         if (c != null) {
             c.onFollowTargetDied(entity);
+        }
+    }
+
+    public void onNPCFollowTargetDowned(NPC npc, int entityType, int entityID) {
+        GameEntity entity = server.getGameEntity(entityType, entityID);
+
+        eventHandlers.forEach((name, handler) -> {
+            try {
+                if (!handler.isDisabled()) {
+                    handler.onNPCFollowTargetDowned(npc, entity);
+                }
+            } catch (final Exception e) {
+                catchException(e);
+            }
+        });
+        Events.emit(EventName.onNpcFollowTargetDowned, npc, entity);
+
+        NPCController c = npc.getController();
+        if (c != null) {
+            c.onFollowTargetDowned(entity);
         }
     }
 
