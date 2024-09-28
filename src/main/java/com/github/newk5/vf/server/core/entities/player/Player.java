@@ -779,7 +779,7 @@ public class Player extends GameCharacter {
         return threadIsValid() ? this.nativeGetVehicle(this.id) : null;
     }
 
-    private native int nativeGetPing(int var1);
+    private native int nativeGetPing(int id);
 
     public int getPing() {
         return threadIsValid() ? this.nativeGetPing(this.id) : -1;
